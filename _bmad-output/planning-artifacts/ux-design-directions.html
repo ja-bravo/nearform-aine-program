@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nearform-aine-bmad UX Design Directions</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --accent: #14b8a6;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --success: #16a34a;
+      --warning: #d97706;
+      --error: #dc2626;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    p { margin: 0 0 20px; color: var(--muted); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    }
+    .card header {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      font-weight: 600;
+      background: #fff;
+    }
+    .mock {
+      padding: 14px;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .input {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      width: fit-content;
+    }
+    .todo {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      font-size: 14px;
+    }
+    .done { color: var(--muted); text-decoration: line-through; }
+    .pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: #fff;
+    }
+    .warning { color: #92400e; border-color: #fbbf24; background: #fffbeb; }
+    .saving { color: #1d4ed8; border-color: #93c5fd; background: #eff6ff; }
+    .error { color: #991b1b; border-color: #fca5a5; background: #fef2f2; }
+    .split { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Design Direction Mockups</h1>
+    <p>Explore six visual directions for a calm, trust-first todo experience.</p>
+    <div class="grid">
+      <section class="card">
+        <header>Direction 1 — Single Surface Minimal</header>
+        <div class="mock">
+          <div class="input">Capture task... (Enter)</div>
+          <button class="btn">Add Task</button>
+          <div class="todo"><span>Book dentist</span><span class="pill">Saved</span></div>
+          <div class="todo"><span class="done">Review PRD</span><span class="pill">Done</span></div>
+          <div class="todo"><span>Follow up vendor</span><span class="pill saving">Saving...</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <header>Direction 2 — Split Active/Completed</header>
+        <div class="mock">
+          <div class="split">
+            <div class="input">What needs doing?</div>
+            <button class="btn">Add</button>
+          </div>
+          <strong style="font-size:12px;">Active</strong>
+          <div class="todo"><span>Pay rent</span><span class="pill">Saved</span></div>
+          <div class="todo"><span>Workout</span><span class="pill">Saved</span></div>
+          <strong style="font-size:12px;">Completed</strong>
+          <div class="todo"><span class="done">Read chapter</span><span class="pill">Done</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <header>Direction 3 — Mobile-First Card Stack</header>
+        <div class="mock" style="max-width: 320px; margin: 0 auto;">
+          <div class="input">Add task quickly...</div>
+          <button class="btn" style="width:100%;">Add Task</button>
+          <div class="todo"><span>Plan trip</span><span class="pill">Saved</span></div>
+          <div class="todo"><span>Call doctor</span><span class="pill warning">Offline Read-only</span></div>
+          <div class="todo"><span>Draft email</span><span class="pill error">Not saved • Retry</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <header>Direction 4 — Dense Productivity Strip</header>
+        <div class="mock">
+          <div class="split">
+            <div class="input">Quick add</div>
+            <button class="btn">+</button>
+          </div>
+          <div class="todo"><span>Task A</span><span class="pill">Saved</span></div>
+          <div class="todo"><span>Task B</span><span class="pill">Saved</span></div>
+          <div class="todo"><span>Task C</span><span class="pill">Saved</span></div>
+          <div class="todo"><span class="done">Task D</span><span class="pill">Done</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <header>Direction 5 — Spacious Calm Rhythm</header>
+        <div class="mock" style="gap:14px;">
+          <div class="input" style="padding:14px;">Capture in seconds...</div>
+          <button class="btn">Add Task</button>
+          <div class="todo" style="padding:14px;"><span>Weekly planning</span><span class="pill">Saved</span></div>
+          <div class="todo" style="padding:14px;"><span>Inbox zero</span><span class="pill saving">Saving...</span></div>
+          <div class="todo" style="padding:14px;"><span class="done">Standup notes</span><span class="pill">Done</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <header>Direction 6 — Status-First Trust UI</header>
+        <div class="mock">
+          <div class="pill warning" style="width:fit-content;">Offline Read-only: sync paused</div>
+          <div class="input">Add task (disabled offline)</div>
+          <button class="btn" disabled style="opacity:.55;">Add Task</button>
+          <div class="todo"><span>Create roadmap</span><span class="pill">Saved</span></div>
+          <div class="todo"><span>Fix tests</span><span class="pill error">Not saved • Retry</span></div>
+          <div class="todo"><span class="done">Buy groceries</span><span class="pill">Done</span></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
