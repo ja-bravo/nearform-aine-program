@@ -299,5 +299,5 @@ Target **practical WCAG-oriented** behavior for core flows: **semantic structure
 
 ### Accessibility
 
-- **NFR-A1:** Core user flows (add, list, complete/incomplete, delete) conform to **WCAG 2.2 Level A** for the custom interactions the team ships; any known gaps are **documented** with a remediation target before “done.”
+- **NFR-A1:** Core user flows (add, list, complete/incomplete, delete) conform to **WCAG 2.2 Level AA** for the custom interactions the team ships; any known gaps are **documented** with a remediation target before “done.”
 - **NFR-A2:** Focus order and visible focus indicators support **keyboard-only** completion of core flows without traps.
