@@ -8,7 +8,7 @@ const runDb = process.env.RUN_DB_TESTS === "1" && process.env.DATABASE_URL;
 describe.skipIf(!runDb)("POST/GET /api/v1/todos (Postgres)", () => {
   it("creates and lists todos; newest first", async () => {
     await runMigrations();
-    const app = createServer();
+    const app = await createServer();
     await app.ready();
     const first = await app.inject({
       method: "POST",

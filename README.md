@@ -109,6 +109,14 @@ pnpm turbo run dev
 - Web: [http://localhost:3000](http://localhost:3000)
 - API: [http://localhost:3001](http://localhost:3001) — set `API_PORT` / `DATABASE_URL` in `.env` as needed.
 
+
+
+
+
+- API: [http://localhost:3001](http://localhost:3001) — set `API_PORT` / `DATABASE_URL` in `.env` as needed.
+
+The home page loads todos from the API using **`NEXT_PUBLIC_API_BASE_URL`**. The API enables **CORS** for browser calls: set **`CORS_ORIGIN`** to a comma-separated list of allowed web origins (default **`http://localhost:3000`**, aligned with **`WEB_PORT`**). Docker Compose passes **`CORS_ORIGIN`** into the **`api`** service so the UI at **`http://localhost:3000`** can call **`http://localhost:3001`**.
+
 ## Monorepo tasks
 
 ```bash
@@ -116,6 +124,7 @@ pnpm turbo run build      # production build (web + api)
 pnpm turbo run lint
 pnpm turbo run typecheck
 pnpm turbo run test
+pnpm --filter web test    # web unit/component tests (Vitest)
 ```
 
 ## Turborepo bootstrap note

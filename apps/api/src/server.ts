@@ -1,3 +1,4 @@
+import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
@@ -11,11 +12,21 @@ export type CreateServerOptions = {
   todoRepository?: TodoRepository;
 };
 
-export function createServer(options?: CreateServerOptions) {
+function parseCorsOrigins(): string[] {
+  const raw = process.env.CORS_ORIGIN ?? "http://localhost:3000";
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+export async function createServer(options?: CreateServerOptions) {
   const app = Fastify({
     logger: true,
     genReqId: () => randomUUID(),
   });
+
+  await app.register(cors, { origin: parseCorsOrigins() });
 
   app.setErrorHandler((error, request, reply) => {
     const err = error as Error & { statusCode?: number; code?: string };

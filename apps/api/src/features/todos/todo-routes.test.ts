@@ -23,7 +23,7 @@ function mockRepo(overrides: Partial<TodoRepository> = {}): TodoRepository {
 describe("POST /api/v1/todos", () => {
   it("returns 201 with data + meta.requestId", async () => {
     const repo = mockRepo();
-    const app = createServer({ todoRepository: repo });
+    const app = await createServer({ todoRepository: repo });
     await app.ready();
     const res = await app.inject({
       method: "POST",
@@ -49,7 +49,7 @@ describe("POST /api/v1/todos", () => {
 
   it("returns 400 VALIDATION_ERROR with requestId and details when description missing", async () => {
     const repo = mockRepo();
-    const app = createServer({ todoRepository: repo });
+    const app = await createServer({ todoRepository: repo });
     await app.ready();
     const res = await app.inject({
       method: "POST",
@@ -71,7 +71,7 @@ describe("POST /api/v1/todos", () => {
 
   it("returns 400 when description is empty after trim", async () => {
     const repo = mockRepo();
-    const app = createServer({ todoRepository: repo });
+    const app = await createServer({ todoRepository: repo });
     await app.ready();
     const res = await app.inject({
       method: "POST",
@@ -87,7 +87,7 @@ describe("POST /api/v1/todos", () => {
 
   it("returns 400 when description is not a string", async () => {
     const repo = mockRepo();
-    const app = createServer({ todoRepository: repo });
+    const app = await createServer({ todoRepository: repo });
     await app.ready();
     const res = await app.inject({
       method: "POST",
@@ -101,7 +101,7 @@ describe("POST /api/v1/todos", () => {
 
   it("returns 400 VALIDATION_ERROR with requestId for malformed JSON", async () => {
     const repo = mockRepo();
-    const app = createServer({ todoRepository: repo });
+    const app = await createServer({ todoRepository: repo });
     await app.ready();
     const res = await app.inject({
       method: "POST",
@@ -140,7 +140,7 @@ describe("GET /api/v1/todos", () => {
         },
       ]),
     });
-    const app = createServer({ todoRepository: repo });
+    const app = await createServer({ todoRepository: repo });
     await app.ready();
     const res = await app.inject({ method: "GET", url: "/api/v1/todos" });
     expect(res.statusCode).toBe(200);
@@ -164,7 +164,7 @@ describe("error envelope", () => {
         throw new Error("secret db failure");
       }),
     });
-    const app = createServer({ todoRepository: repo });
+    const app = await createServer({ todoRepository: repo });
     await app.ready();
     const res = await app.inject({
       method: "POST",

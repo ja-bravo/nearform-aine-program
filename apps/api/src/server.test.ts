@@ -31,9 +31,29 @@ describe("toErrorBody", () => {
   });
 });
 
+describe("cors", () => {
+  it("reflects allowed Origin for preflight", async () => {
+    const app = await createServer();
+    await app.ready();
+    const res = await app.inject({
+      method: "OPTIONS",
+      url: "/healthz/live",
+      headers: {
+        origin: "http://localhost:3000",
+        "access-control-request-method": "GET",
+      },
+    });
+    expect(res.statusCode).toBe(204);
+    expect(res.headers["access-control-allow-origin"]).toBe(
+      "http://localhost:3000"
+    );
+    await app.close();
+  });
+});
+
 describe("healthz", () => {
   it("GET /healthz/live returns 200", async () => {
-    const app = createServer();
+    const app = await createServer();
     await app.ready();
     const res = await app.inject({ method: "GET", url: "/healthz/live" });
     expect(res.statusCode).toBe(200);
@@ -44,7 +64,7 @@ describe("healthz", () => {
   it("GET /healthz/ready returns 503 without DATABASE_URL", async () => {
     const prev = process.env.DATABASE_URL;
     delete process.env.DATABASE_URL;
-    const app = createServer();
+    const app = await createServer();
     await app.ready();
     const res = await app.inject({ method: "GET", url: "/healthz/ready" });
     expect(res.statusCode).toBe(503);

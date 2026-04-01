@@ -6,7 +6,7 @@ const host = process.env.API_HOST ?? "0.0.0.0";
 
 async function main() {
   await runMigrations();
-  const app = createServer();
+  const app = await createServer();
   await app.listen({ port, host });
 }
 
