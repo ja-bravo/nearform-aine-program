@@ -16,7 +16,8 @@
     "@nearform/sql": "1.10.7",
     "fastify": "^5.2.1",
     "pg": "^8.14.1",
-    "postgrator": "8.0.0"
+    "postgrator": "8.0.0",
+    "zod": "^4"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

@@ -17,6 +17,13 @@ export function getPool(): pg.Pool {
   return pool;
 }
 
+export async function closePool(): Promise<void> {
+  if (pool) {
+    await pool.end();
+    pool = null;
+  }
+}
+
 export async function pingDbWithNearformSql(): Promise<void> {
   const statement = SQL`SELECT 1 AS one`;
   const p = getPool();

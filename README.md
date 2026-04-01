@@ -41,6 +41,24 @@ Wait until health checks pass, then verify:
 
 Ports come from `.env` (`WEB_PORT`, `API_PORT`).
 
+## Todos API (`/api/v1/todos`)
+
+JSON only. List responses use **`{ "data": { "todos": [ ... ] }, "meta": { "requestId": "..." } }`**. Create responses use **`{ "data": { ...todo }, "meta": { "requestId": "..." } }`**. Todos in **`GET /api/v1/todos`** are ordered by **`createdAt` descending** (newest first). Errors use **`{ "error": { "code", "message", "details?", "requestId" } }`** (no stack traces in the body).
+
+Create a todo:
+
+```bash
+curl -sS -X POST "http://localhost:3001/api/v1/todos" \
+  -H "Content-Type: application/json" \
+  -d '{"description":"Buy milk"}'
+```
+
+List todos:
+
+```bash
+curl -sS "http://localhost:3001/api/v1/todos"
+```
+
 **Compose startup order:** `postgres` exposes a healthcheck (`pg_isready`). The **api** service uses `depends_on: postgres: condition: service_healthy`, so Postgres accepts connections before the API image builds and starts. **web** waits on **api** health (`/healthz/live`), so the database and migrations complete before the UI container is considered up.
 
 ## Database migrations (Postgrator)

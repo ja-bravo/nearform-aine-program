@@ -5,7 +5,7 @@ import { dirname, join } from "path";
 import { afterAll, describe, expect, it } from "vitest";
 import { fileURLToPath } from "url";
 import { getMigrationsGlob, runMigrations } from "./migration-runner.js";
-import { getPool, pingDbWithNearformSql } from "./pool.js";
+import { closePool, getPool, pingDbWithNearformSql } from "./pool.js";
 
 const migrationsDir = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -56,8 +56,7 @@ const runDb = process.env.RUN_DB_TESTS === "1" && process.env.DATABASE_URL;
 
 describe.skipIf(!runDb)("migrations against Postgres", () => {
   afterAll(async () => {
-    const pool = getPool();
-    await pool.end();
+    await closePool();
   });
 
   it("applies migrations and records schema version", async () => {

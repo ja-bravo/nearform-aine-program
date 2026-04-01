@@ -1,5 +1,5 @@
 # generated: 2026-04-01T16:30:36Z
-# last_updated: 2026-04-01T23:45:00Z
+# last_updated: 2026-04-02T00:20:00Z
 # project: nearform-aine-bmad
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-04-01T16:30:36Z"
-last_updated: "2026-04-01T23:45:00Z"
+last_updated: "2026-04-02T00:20:00Z"
 project: nearform-aine-bmad
 project_key: NOKEY
 tracking_system: file-system
@@ -45,7 +45,7 @@ development_status:
   epic-1: in-progress
   1-1-set-up-initial-project-from-starter-template: done
   1-2-create-todo-persistence-schema-and-migration-pipeline: done
-  1-3-implement-create-and-list-todos-api-contract: backlog
+  1-3-implement-create-and-list-todos-api-contract: done
   1-4-build-primary-capture-and-list-surface: backlog
   epic-1-retrospective: optional
 
