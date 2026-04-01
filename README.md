@@ -41,6 +41,37 @@ Wait until health checks pass, then verify:
 
 Ports come from `.env` (`WEB_PORT`, `API_PORT`).
 
+**Compose startup order:** `postgres` exposes a healthcheck (`pg_isready`). The **api** service uses `depends_on: postgres: condition: service_healthy`, so Postgres accepts connections before the API image builds and starts. **web** waits on **api** health (`/healthz/live`), so the database and migrations complete before the UI container is considered up.
+
+## Database migrations (Postgrator)
+
+SQL migrations live in **`apps/api/migrations/`** and are applied with **[Postgrator 8.0.0](https://www.npmjs.com/package/postgrator)**. Files use Postgrator’s naming: **`NNN.do.<description>.sql`** (apply) and **`NNN.undo.<description>.sql`** (revert). Version history is stored in the PostgreSQL table **`schemaversion`** (default Postgrator table).
+
+**Primary path:** on each API boot, **`runMigrations()`** runs before `listen`, so pending migrations apply exactly once before traffic is served. If a migration fails (bad SQL, DB down, permissions), the process **exits** after logging a structured error (no stack traces on HTTP responses—the server never listens).
+
+**Manual / CI (optional):** from the repo root, after `DATABASE_URL` is set:
+
+```bash
+pnpm --filter api migrate
+```
+
+Uses `tsx` against `apps/api/src/migrate.ts`. After `pnpm --filter api build`, the same entry exists as **`node apps/api/dist/migrate.js`**.
+
+**Local requirements:** the API now expects **`DATABASE_URL`** at startup so migrations can run. For UI-only work without Postgres, start **postgres** or point `DATABASE_URL` at a reachable instance.
+
+### DB-backed tests
+
+Integration tests that run migrations against a real Postgres are **opt-in**:
+
+```bash
+docker compose up postgres -d
+RUN_DB_TESTS=1 DATABASE_URL=postgresql://todo:todo@127.0.0.1:5432/todo pnpm --filter api test
+```
+
+## Backup and recovery (MVP)
+
+For MVP and single-node deploys, treat the Postgres **volume** as the source of truth: snapshot the data directory or run **`pg_dump`** on a schedule you can actually restore from. There is no automated multi-AZ failover in this baseline—document who runs backups, how often, and where dumps live so an acknowledged write can be recovered after operator error or host loss.
+
 ### Clean restart (data wipe)
 
 ```bash
@@ -89,4 +120,4 @@ Then **packages/** and root **Turbo/pnpm** files were merged here. **`apps/web`*
 
 - Running **`pnpm install`** again is safe.
 - Running **`docker compose up`** again is incremental; use **`docker compose down -v`** only when you need a clean database volume.
-- Database **migrations** are introduced in later stories; this slice only ensures Postgres and readiness checks.
+- Database **migrations** run automatically when the API starts; see **Database migrations (Postgrator)** above.

@@ -6,14 +6,17 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.build.json",
+    "migrate": "tsx src/migrate.ts",
     "start": "node dist/index.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run"
   },
   "dependencies": {
+    "@nearform/sql": "1.10.7",
     "fastify": "^5.2.1",
-    "pg": "^8.14.1"
+    "pg": "^8.14.1",
+    "postgrator": "8.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -21,9 +24,9 @@
     "@types/pg": "^8.11.11",
     "eslint": "^9.39.1",
     "globals": "^16.5.0",
-    "typescript-eslint": "^8.50.0",
     "tsx": "^4.19.3",
     "typescript": "^5.9.2",
+    "typescript-eslint": "^8.50.0",
     "vitest": "^3.1.1"
   }
 }
