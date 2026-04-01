@@ -1,0 +1,8 @@
+node_modules
+**/.next
+**/dist
+.git
+_bmad-output
+.cursor
+**/*.md
+!README.md
