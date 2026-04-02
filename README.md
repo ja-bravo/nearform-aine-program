@@ -59,6 +59,35 @@ List todos:
 curl -sS "http://localhost:3001/api/v1/todos"
 ```
 
+Toggle todo completion:
+
+```bash
+curl -sS -X PATCH "http://localhost:3001/api/v1/todos/{id}" \
+  -H "Content-Type: application/json" \
+  -d '{"isCompleted": true}'
+```
+
+Success response (200):
+
+```json
+{
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "description": "Buy milk",
+    "isCompleted": true,
+    "createdAt": "2026-03-31T10:30:00.000Z"
+  },
+  "meta": {
+    "requestId": "req-12345abcde"
+  }
+}
+```
+
+Error responses:
+
+- **404 NOT_FOUND** — Todo id does not exist
+- **400 VALIDATION_ERROR** — Invalid request body (e.g., `isCompleted` is not a boolean or is missing)
+
 **Compose startup order:** `postgres` exposes a healthcheck (`pg_isready`). The **api** service uses `depends_on: postgres: condition: service_healthy`, so Postgres accepts connections before the API image builds and starts. **web** waits on **api** health (`/healthz/live`), so the database and migrations complete before the UI container is considered up.
 
 ## Database migrations (Postgrator)

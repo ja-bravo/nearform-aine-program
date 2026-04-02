@@ -7,6 +7,8 @@ import {
   createTodoSuccessSchema,
   listTodosSuccessSchema,
   todoDtoSchema,
+  updateTodoBodySchema,
+  updateTodoSuccessSchema,
 } from "./todo-schemas.js";
 import {
   createTodoRepository,
@@ -51,6 +53,35 @@ export function registerTodosRoutes(
         };
         listTodosSuccessSchema.parse(payload);
         return reply.send(payload);
+      });
+
+      scope.patch<{ Params: { id: string } }>("/:id", async (request, reply) => {
+        const parsed = updateTodoBodySchema.safeParse(request.body);
+        if (!parsed.success) {
+          return reply.status(400).send(
+            toErrorBody(400, "Invalid request body", request.id, {
+              code: "VALIDATION_ERROR",
+              details: flattenError(parsed.error),
+            })
+          );
+        }
+
+        const row = await repo.updateTodoCompletion(request.params.id, parsed.data.isCompleted);
+        if (!row) {
+          return reply.status(404).send(
+            toErrorBody(404, `Todo with id '${request.params.id}' not found`, request.id, {
+              code: "NOT_FOUND",
+            })
+          );
+        }
+
+        const dto = todoDtoSchema.parse(rowToTodoDto(row));
+        const payload = {
+          data: dto,
+          meta: { requestId: request.id },
+        };
+        updateTodoSuccessSchema.parse(payload);
+        return reply.status(200).send(payload);
       });
     },
     { prefix: "/api/v1/todos" }

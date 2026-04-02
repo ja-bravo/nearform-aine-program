@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # /// script
 # requires-python = ">=3.10"
 # dependencies = ["pyyaml"]
@@ -232,11 +233,10 @@ def apply_result_template(var_def, raw_value, context):
 # =============================================================================
 
 def cmd_load(args):
-    """Load config vars — the fast path."""
+    """Load config vars - the fast path."""
     project_root = find_project_root(llm_provided=args.project_root)
     if not project_root:
-        print(json.dumps({'error': 'Project root not found (_bmad folder not detected)'}),
-              file=sys.stderr)
+        print(json.dumps({'error': 'Project root not found (_bmad folder not detected)'}), file=sys.stderr)
         sys.exit(1)
 
     module_code = args.module or 'core'

@@ -7,15 +7,16 @@ const fixedId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
 const fixedDate = new Date("2026-04-01T12:00:00.000Z");
 
 function mockRepo(overrides: Partial<TodoRepository> = {}): TodoRepository {
-  const row = (description: string): TodoRow => ({
+  const row = (description: string, isCompleted: boolean = false): TodoRow => ({
     id: fixedId,
     description,
-    is_completed: false,
+    is_completed: isCompleted,
     created_at: fixedDate,
   });
   return {
     insertTodo: vi.fn(async (d) => row(d)),
     findAllTodosOrderedByCreatedAtDesc: vi.fn(async () => []),
+    updateTodoCompletion: vi.fn(async (id, isCompleted) => row("test", isCompleted)),
     ...overrides,
   };
 }
@@ -182,6 +183,163 @@ describe("error envelope", () => {
       expect(parsed.data.error.message).toBe("An unexpected error occurred");
       expect(String(JSON.stringify(raw))).not.toContain("secret");
     }
+    await app.close();
+  });
+});
+
+describe("PATCH /api/v1/todos/:id", () => {
+  it("returns 200 with updated isCompleted state", async () => {
+    const repo = mockRepo();
+    const app = await createServer({ todoRepository: repo });
+    await app.ready();
+    const res = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/todos/${fixedId}`,
+      headers: { "content-type": "application/json" },
+      payload: JSON.stringify({ isCompleted: true }),
+    });
+    expect(res.statusCode).toBe(200);
+    const body = JSON.parse(res.body) as {
+      data: Record<string, unknown>;
+      meta: { requestId: string };
+    };
+    expect(body.data).toMatchObject({
+      id: fixedId,
+      description: "test",
+      isCompleted: true,
+      createdAt: "2026-04-01T12:00:00.000Z",
+    });
+    expect(typeof body.meta.requestId).toBe("string");
+    expect(body.meta.requestId.length).toBeGreaterThan(0);
+    await app.close();
+  });
+
+  it("returns 404 NOT_FOUND with error envelope when todo not found", async () => {
+    const repo = mockRepo({
+      updateTodoCompletion: vi.fn(async () => null),
+    });
+    const app = await createServer({ todoRepository: repo });
+    await app.ready();
+    const nonExistentId = "00000000-0000-0000-0000-000000000000";
+    const res = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/todos/${nonExistentId}`,
+      headers: { "content-type": "application/json" },
+      payload: JSON.stringify({ isCompleted: true }),
+    });
+    expect(res.statusCode).toBe(404);
+    const parsed = errorEnvelopeSchema.safeParse(JSON.parse(res.body));
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.error.code).toBe("NOT_FOUND");
+      expect(parsed.data.error.requestId).toBeDefined();
+      expect(parsed.data.error.message).toContain(nonExistentId);
+    }
+    await app.close();
+  });
+
+  it("returns 400 VALIDATION_ERROR when isCompleted is not boolean", async () => {
+    const repo = mockRepo();
+    const app = await createServer({ todoRepository: repo });
+    await app.ready();
+    const res = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/todos/${fixedId}`,
+      headers: { "content-type": "application/json" },
+      payload: JSON.stringify({ isCompleted: "true" }),
+    });
+    expect(res.statusCode).toBe(400);
+    const parsed = errorEnvelopeSchema.safeParse(JSON.parse(res.body));
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.error.code).toBe("VALIDATION_ERROR");
+      expect(parsed.data.error.requestId).toBeDefined();
+      expect(parsed.data.error.details).toBeDefined();
+    }
+    expect(JSON.parse(res.body)).not.toHaveProperty("stack");
+    await app.close();
+  });
+
+  it("returns 400 VALIDATION_ERROR when isCompleted is missing", async () => {
+    const repo = mockRepo();
+    const app = await createServer({ todoRepository: repo });
+    await app.ready();
+    const res = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/todos/${fixedId}`,
+      headers: { "content-type": "application/json" },
+      payload: JSON.stringify({}),
+    });
+    expect(res.statusCode).toBe(400);
+    const parsed = errorEnvelopeSchema.safeParse(JSON.parse(res.body));
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.error.code).toBe("VALIDATION_ERROR");
+      expect(parsed.data.error.requestId).toBeDefined();
+      expect(parsed.data.error.details).toBeDefined();
+    }
+    await app.close();
+  });
+
+  it("verifies idempotency: identical requests return same state", async () => {
+    const repo = mockRepo();
+    const app = await createServer({ todoRepository: repo });
+    await app.ready();
+    const res1 = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/todos/${fixedId}`,
+      headers: { "content-type": "application/json" },
+      payload: JSON.stringify({ isCompleted: true }),
+    });
+    expect(res1.statusCode).toBe(200);
+    const body1 = JSON.parse(res1.body);
+
+    const res2 = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/todos/${fixedId}`,
+      headers: { "content-type": "application/json" },
+      payload: JSON.stringify({ isCompleted: true }),
+    });
+    expect(res2.statusCode).toBe(200);
+    const body2 = JSON.parse(res2.body);
+
+    expect(body1.data.isCompleted).toBe(body2.data.isCompleted);
+    expect(body1.data.id).toBe(body2.data.id);
+    await app.close();
+  });
+
+  it("toggles between true and false states", async () => {
+    const repo = mockRepo({
+      updateTodoCompletion: vi.fn(async (id, isCompleted) => ({
+        id,
+        description: "Buy milk",
+        is_completed: isCompleted,
+        created_at: fixedDate,
+      })),
+    });
+    const app = await createServer({ todoRepository: repo });
+    await app.ready();
+
+    const res1 = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/todos/${fixedId}`,
+      headers: { "content-type": "application/json" },
+      payload: JSON.stringify({ isCompleted: true }),
+    });
+    expect(res1.statusCode).toBe(200);
+    const body1 = JSON.parse(res1.body);
+    expect(body1.data.isCompleted).toBe(true);
+
+    const res2 = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/todos/${fixedId}`,
+      headers: { "content-type": "application/json" },
+      payload: JSON.stringify({ isCompleted: false }),
+    });
+    expect(res2.statusCode).toBe(200);
+    const body2 = JSON.parse(res2.body);
+    expect(body2.data.isCompleted).toBe(false);
+
     await app.close();
   });
 });

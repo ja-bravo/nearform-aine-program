@@ -49,8 +49,8 @@ development_status:
   1-4-build-primary-capture-and-list-surface: done
   epic-1-retrospective: optional
 
-  epic-2: backlog
-  2-1-implement-complete-uncomplete-api-and-state-mapping: backlog
+  epic-2: in-progress
+  2-1-implement-complete-uncomplete-api-and-state-mapping: review
   2-2-implement-delete-todo-api-with-safe-error-handling: backlog
   2-3-build-todo-row-interactions-and-visual-state-distinction: backlog
   epic-2-retrospective: optional

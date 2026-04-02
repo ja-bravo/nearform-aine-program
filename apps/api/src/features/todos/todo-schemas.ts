@@ -27,6 +27,17 @@ export const listTodosSuccessSchema = z.object({
   meta: z.object({ requestId: z.string() }),
 });
 
+export const updateTodoBodySchema = z.object({
+  isCompleted: z.boolean(),
+});
+
+export type UpdateTodoBody = z.infer<typeof updateTodoBodySchema>;
+
+export const updateTodoSuccessSchema = z.object({
+  data: todoDtoSchema,
+  meta: z.object({ requestId: z.string() }),
+});
+
 export const errorEnvelopeSchema = z.object({
   error: z.object({
     code: z.string(),
