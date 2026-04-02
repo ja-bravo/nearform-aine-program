@@ -1,13 +1,5 @@
 import type { TodoDto } from "@/shared/api/schemas";
-
-const createdAtFormatter = new Intl.DateTimeFormat(undefined, {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
-
-function formatCreatedAt(iso: string): string {
-  return createdAtFormatter.format(new Date(iso));
-}
+import { TodoItemRow } from "./todo-item-row";
 
 type TodoListProps = {
   todos: TodoDto[];
@@ -59,27 +51,8 @@ export function TodoList({ todos, isLoading, loadFailed }: TodoListProps) {
 
   return (
     <ul className="flex flex-col gap-2 p-2" role="list">
-      {todos.map((todo) => (
-        <li
-          key={todo.id}
-          className="flex items-start gap-3 rounded-lg border border-zinc-200 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
-        >
-          <input
-            type="checkbox"
-            checked={todo.isCompleted}
-            disabled
-            className="mt-1 h-4 w-4 shrink-0 rounded border-zinc-300 text-zinc-900 opacity-70 dark:border-zinc-600"
-            aria-label={todo.isCompleted ? "Completed" : "Not completed"}
-          />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-              {todo.description}
-            </p>
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-              Added {formatCreatedAt(todo.createdAt)}
-            </p>
-          </div>
-        </li>
+      {todos?.map((todo) => (
+        <TodoItemRow key={todo.id} todo={todo} />
       ))}
     </ul>
   );
