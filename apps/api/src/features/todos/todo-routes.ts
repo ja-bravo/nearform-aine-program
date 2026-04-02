@@ -9,6 +9,7 @@ import {
   todoDtoSchema,
   updateTodoBodySchema,
   updateTodoSuccessSchema,
+  paramIdSchema,
 } from "./todo-schemas.js";
 import {
   createTodoRepository,
@@ -55,34 +56,60 @@ export function registerTodosRoutes(
         return reply.send(payload);
       });
 
-      scope.patch<{ Params: { id: string } }>("/:id", async (request, reply) => {
-        const parsed = updateTodoBodySchema.safeParse(request.body);
-        if (!parsed.success) {
-          return reply.status(400).send(
-            toErrorBody(400, "Invalid request body", request.id, {
-              code: "VALIDATION_ERROR",
-              details: flattenError(parsed.error),
-            })
-          );
-        }
+      scope.patch<{ Params: { id: string } }>(
+        "/:id",
+        async (request, reply) => {
+          const paramParsed = paramIdSchema.safeParse({
+            id: request.params.id,
+          });
+          if (!paramParsed.success) {
+            return reply.status(400).send(
+              toErrorBody(400, "Invalid todo ID format", request.id, {
+                code: "VALIDATION_ERROR",
+                details: { id: "Must be a valid UUID" },
+              })
+            );
+          }
 
-        const row = await repo.updateTodoCompletion(request.params.id, parsed.data.isCompleted);
-        if (!row) {
-          return reply.status(404).send(
-            toErrorBody(404, `Todo with id '${request.params.id}' not found`, request.id, {
-              code: "NOT_FOUND",
-            })
-          );
-        }
+          const parsed = updateTodoBodySchema.safeParse(request.body);
+          if (!parsed.success) {
+            return reply.status(400).send(
+              toErrorBody(400, "Invalid request body", request.id, {
+                code: "VALIDATION_ERROR",
+                details: flattenError(parsed.error),
+              })
+            );
+          }
 
-        const dto = todoDtoSchema.parse(rowToTodoDto(row));
-        const payload = {
-          data: dto,
-          meta: { requestId: request.id },
-        };
-        updateTodoSuccessSchema.parse(payload);
-        return reply.status(200).send(payload);
-      });
+          try {
+            const row = await repo.updateTodoCompletion(
+              paramParsed.data.id,
+              parsed.data.isCompleted
+            );
+            if (!row) {
+              return reply.status(404).send(
+                toErrorBody(404, `Todo not found`, request.id, {
+                  code: "NOT_FOUND",
+                })
+              );
+            }
+
+            const dto = todoDtoSchema.parse(rowToTodoDto(row));
+            const payload = {
+              data: dto,
+              meta: { requestId: request.id },
+            };
+            updateTodoSuccessSchema.parse(payload);
+            return reply.status(200).send(payload);
+          } catch (error) {
+            const message =
+              error instanceof Error
+                ? error.message
+                : "An unexpected error occurred";
+            throw new Error(message);
+          }
+        }
+      );
     },
     { prefix: "/api/v1/todos" }
   );

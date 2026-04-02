@@ -46,3 +46,7 @@ export const errorEnvelopeSchema = z.object({
     details: z.unknown().optional(),
   }),
 });
+
+export const paramIdSchema = z.object({
+  id: z.uuid(),
+});

@@ -11,7 +11,10 @@ export type TodoRow = {
 export type TodoRepository = {
   insertTodo(description: string): Promise<TodoRow>;
   findAllTodosOrderedByCreatedAtDesc(): Promise<TodoRow[]>;
-  updateTodoCompletion(id: string, isCompleted: boolean): Promise<TodoRow | null>;
+  updateTodoCompletion(
+    id: string,
+    isCompleted: boolean
+  ): Promise<TodoRow | null>;
 };
 
 export function createTodoRepository(): TodoRepository {
@@ -48,18 +51,27 @@ export function createTodoRepository(): TodoRepository {
       return result.rows;
     },
 
-    async updateTodoCompletion(id: string, isCompleted: boolean): Promise<TodoRow | null> {
+    async updateTodoCompletion(
+      id: string,
+      isCompleted: boolean
+    ): Promise<TodoRow | null> {
       const pool = getPool();
       const statement = SQL`
         UPDATE todos SET is_completed = ${isCompleted}
         WHERE id = ${id}
         RETURNING id, description, is_completed, created_at
       `;
-      const result = await pool.query<TodoRow>({
-        text: statement.text,
-        values: statement.values,
-      });
-      return result.rows[0] ?? null;
+      try {
+        const result = await pool.query<TodoRow>({
+          text: statement.text,
+          values: statement.values,
+        });
+        return result.rows[0] ?? null;
+      } catch (error) {
+        throw new Error(
+          `Failed to update todo: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
     },
   };
 }

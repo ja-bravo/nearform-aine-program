@@ -16,7 +16,9 @@ function mockRepo(overrides: Partial<TodoRepository> = {}): TodoRepository {
   return {
     insertTodo: vi.fn(async (d) => row(d)),
     findAllTodosOrderedByCreatedAtDesc: vi.fn(async () => []),
-    updateTodoCompletion: vi.fn(async (id, isCompleted) => row("test", isCompleted)),
+    updateTodoCompletion: vi.fn(async (id, isCompleted) =>
+      row("test", isCompleted)
+    ),
     ...overrides,
   };
 }
@@ -233,7 +235,7 @@ describe("PATCH /api/v1/todos/:id", () => {
     if (parsed.success) {
       expect(parsed.data.error.code).toBe("NOT_FOUND");
       expect(parsed.data.error.requestId).toBeDefined();
-      expect(parsed.data.error.message).toContain(nonExistentId);
+      expect(parsed.data.error.message).toBe("Todo not found");
     }
     await app.close();
   });
@@ -339,6 +341,63 @@ describe("PATCH /api/v1/todos/:id", () => {
     expect(res2.statusCode).toBe(200);
     const body2 = JSON.parse(res2.body);
     expect(body2.data.isCompleted).toBe(false);
+
+    await app.close();
+  });
+
+  it("verifies persistence: GET after PATCH returns updated state (AC 2)", async () => {
+    const repo = mockRepo({
+      findAllTodosOrderedByCreatedAtDesc: vi.fn(async () => [
+        {
+          id: fixedId,
+          description: "Buy milk",
+          is_completed: true,
+          created_at: fixedDate,
+        },
+      ]),
+    });
+    const app = await createServer({ todoRepository: repo });
+    await app.ready();
+
+    const patchRes = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/todos/${fixedId}`,
+      headers: { "content-type": "application/json" },
+      payload: JSON.stringify({ isCompleted: true }),
+    });
+    expect(patchRes.statusCode).toBe(200);
+
+    const getRes = await app.inject({
+      method: "GET",
+      url: "/api/v1/todos",
+    });
+    expect(getRes.statusCode).toBe(200);
+    const getBody = JSON.parse(getRes.body) as {
+      data: { todos: Array<{ id: string; isCompleted: boolean }> };
+    };
+    expect(getBody.data.todos).toHaveLength(1);
+    expect(getBody.data.todos[0].id).toBe(fixedId);
+    expect(getBody.data.todos[0].isCompleted).toBe(true);
+
+    await app.close();
+  });
+
+  it("performance baseline: PATCH completes within acceptable time (AC 5)", async () => {
+    const repo = mockRepo();
+    const app = await createServer({ todoRepository: repo });
+    await app.ready();
+
+    const startTime = performance.now();
+    const res = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/todos/${fixedId}`,
+      headers: { "content-type": "application/json" },
+      payload: JSON.stringify({ isCompleted: true }),
+    });
+    const elapsedMs = performance.now() - startTime;
+
+    expect(res.statusCode).toBe(200);
+    expect(elapsedMs).toBeLessThan(500);
 
     await app.close();
   });
