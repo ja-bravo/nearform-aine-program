@@ -110,6 +110,31 @@ export function registerTodosRoutes(
           }
         }
       );
+
+      scope.delete<{ Params: { id: string } }>("/:id", async (request, reply) => {
+        const paramParsed = paramIdSchema.safeParse({ id: request.params.id });
+        if (!paramParsed.success) {
+          return reply.status(400).send(
+            toErrorBody(400, "Invalid todo ID format", request.id, {
+              code: "VALIDATION_ERROR",
+              details: { id: "Must be a valid UUID" },
+            })
+          );
+        }
+        try {
+          const deleted = await repo.deleteTodo(paramParsed.data.id);
+          if (!deleted) {
+            return reply.status(404).send(
+              toErrorBody(404, "Todo not found", request.id, { code: "NOT_FOUND" })
+            );
+          }
+          return reply.status(204).send();
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : "An unexpected error occurred";
+          throw new Error(message);
+        }
+      });
     },
     { prefix: "/api/v1/todos" }
   );

@@ -15,6 +15,7 @@ export type TodoRepository = {
     id: string,
     isCompleted: boolean
   ): Promise<TodoRow | null>;
+  deleteTodo(id: string): Promise<boolean>;
 };
 
 export function createTodoRepository(): TodoRepository {
@@ -70,6 +71,24 @@ export function createTodoRepository(): TodoRepository {
       } catch (error) {
         throw new Error(
           `Failed to update todo: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    },
+
+    async deleteTodo(id: string): Promise<boolean> {
+      const pool = getPool();
+      const statement = SQL`
+        DELETE FROM todos WHERE id = ${id}
+      `;
+      try {
+        const result = await pool.query({
+          text: statement.text,
+          values: statement.values,
+        });
+        return (result.rowCount ?? 0) > 0;
+      } catch (error) {
+        throw new Error(
+          `Failed to delete todo: ${error instanceof Error ? error.message : String(error)}`
         );
       }
     },

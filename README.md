@@ -88,6 +88,45 @@ Error responses:
 - **404 NOT_FOUND** — Todo id does not exist
 - **400 VALIDATION_ERROR** — Invalid request body (e.g., `isCompleted` is not a boolean or is missing)
 
+Delete a todo:
+
+```bash
+curl -sS -X DELETE "http://localhost:3001/api/v1/todos/{id}"
+```
+
+Success response (204 — no body):
+
+```
+HTTP/1.1 204 No Content
+```
+
+Error responses:
+
+- **404 NOT_FOUND** — Todo id does not exist
+
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Todo not found",
+    "requestId": "req-12345abcde"
+  }
+}
+```
+
+- **400 VALIDATION_ERROR** — `id` is not a valid UUID (e.g., `"abc"`, `"123"`)
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid todo ID format",
+    "details": { "id": "Must be a valid UUID" },
+    "requestId": "req-12345abcde"
+  }
+}
+```
+
 **Compose startup order:** `postgres` exposes a healthcheck (`pg_isready`). The **api** service uses `depends_on: postgres: condition: service_healthy`, so Postgres accepts connections before the API image builds and starts. **web** waits on **api** health (`/healthz/live`), so the database and migrations complete before the UI container is considered up.
 
 ## Database migrations (Postgrator)

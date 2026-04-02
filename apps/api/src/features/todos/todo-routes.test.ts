@@ -19,6 +19,7 @@ function mockRepo(overrides: Partial<TodoRepository> = {}): TodoRepository {
     updateTodoCompletion: vi.fn(async (id, isCompleted) =>
       row("test", isCompleted)
     ),
+    deleteTodo: vi.fn(async () => true),
     ...overrides,
   };
 }
@@ -397,6 +398,132 @@ describe("PATCH /api/v1/todos/:id", () => {
     const elapsedMs = performance.now() - startTime;
 
     expect(res.statusCode).toBe(200);
+    expect(elapsedMs).toBeLessThan(500);
+
+    await app.close();
+  });
+});
+
+describe("DELETE /api/v1/todos/:id", () => {
+  it("returns 204 with no body on successful delete", async () => {
+    const repo = mockRepo();
+    const app = await createServer({ todoRepository: repo });
+    await app.ready();
+    const res = await app.inject({
+      method: "DELETE",
+      url: `/api/v1/todos/${fixedId}`,
+    });
+    expect(res.statusCode).toBe(204);
+    expect(res.body).toBe("");
+    await app.close();
+  });
+
+  it("returns 404 NOT_FOUND with error envelope when todo not found", async () => {
+    const repo = mockRepo({
+      deleteTodo: vi.fn(async () => false),
+    });
+    const app = await createServer({ todoRepository: repo });
+    await app.ready();
+    const nonExistentId = "00000000-0000-0000-0000-000000000000";
+    const res = await app.inject({
+      method: "DELETE",
+      url: `/api/v1/todos/${nonExistentId}`,
+    });
+    expect(res.statusCode).toBe(404);
+    const parsed = errorEnvelopeSchema.safeParse(JSON.parse(res.body));
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.error.code).toBe("NOT_FOUND");
+      expect(parsed.data.error.requestId).toBeDefined();
+      expect(parsed.data.error.message).toBe("Todo not found");
+    }
+    await app.close();
+  });
+
+  it("returns 400 VALIDATION_ERROR for invalid UUID format", async () => {
+    const repo = mockRepo();
+    const app = await createServer({ todoRepository: repo });
+    await app.ready();
+    const res = await app.inject({
+      method: "DELETE",
+      url: `/api/v1/todos/not-a-uuid`,
+    });
+    expect(res.statusCode).toBe(400);
+    const parsed = errorEnvelopeSchema.safeParse(JSON.parse(res.body));
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.error.code).toBe("VALIDATION_ERROR");
+      expect(parsed.data.error.requestId).toBeDefined();
+    }
+    await app.close();
+  });
+
+  it("returns 404 on second delete of same id (first 204, then 404)", async () => {
+    const deleteTodo = vi.fn(async () => true);
+    const repo = mockRepo({ deleteTodo });
+    const app = await createServer({ todoRepository: repo });
+    await app.ready();
+
+    const res1 = await app.inject({
+      method: "DELETE",
+      url: `/api/v1/todos/${fixedId}`,
+    });
+    expect(res1.statusCode).toBe(204);
+
+    // Simulate second call: item no longer exists
+    deleteTodo.mockResolvedValueOnce(false);
+    const res2 = await app.inject({
+      method: "DELETE",
+      url: `/api/v1/todos/${fixedId}`,
+    });
+    expect(res2.statusCode).toBe(404);
+    const parsed = errorEnvelopeSchema.safeParse(JSON.parse(res2.body));
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.error.code).toBe("NOT_FOUND");
+    }
+
+    await app.close();
+  });
+
+  it("does not expose internal error details when repository throws", async () => {
+    const repo = mockRepo({
+      deleteTodo: vi.fn(async () => {
+        throw new Error("secret db failure");
+      }),
+    });
+    const app = await createServer({ todoRepository: repo });
+    await app.ready();
+    const res = await app.inject({
+      method: "DELETE",
+      url: `/api/v1/todos/${fixedId}`,
+    });
+    expect(res.statusCode).toBe(500);
+    const raw = JSON.parse(res.body) as Record<string, unknown>;
+    expect(raw).not.toHaveProperty("stack");
+    const parsed = errorEnvelopeSchema.safeParse(raw);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.error.code).toBe("INTERNAL_ERROR");
+      expect(parsed.data.error.message).toBe("An unexpected error occurred");
+      expect(String(JSON.stringify(raw))).not.toContain("secret");
+    }
+    await app.close();
+  });
+
+  it("performance baseline: DELETE completes within 500ms", async () => {
+    const repo = mockRepo();
+    const app = await createServer({ todoRepository: repo });
+    await app.ready();
+
+    const startTime = performance.now();
+    const res = await app.inject({
+      method: "DELETE",
+      url: `/api/v1/todos/${fixedId}`,
+    });
+    const elapsedMs = performance.now() - startTime;
+
+    expect(res.statusCode).toBe(204);
     expect(elapsedMs).toBeLessThan(500);
 
     await app.close();

@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-04-01T16:30:36Z"
-last_updated: "2026-04-02T18:22:11Z"
+last_updated: "2026-04-02T18:41:00Z"
 project: nearform-aine-bmad
 project_key: NOKEY
 tracking_system: file-system
@@ -51,7 +51,7 @@ development_status:
 
   epic-2: in-progress
   2-1-implement-complete-uncomplete-api-and-state-mapping: done
-  2-2-implement-delete-todo-api-with-safe-error-handling: backlog
+  2-2-implement-delete-todo-api-with-safe-error-handling: done
   2-3-build-todo-row-interactions-and-visual-state-distinction: backlog
   epic-2-retrospective: optional
 
