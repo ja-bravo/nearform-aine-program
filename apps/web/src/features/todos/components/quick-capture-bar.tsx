@@ -36,6 +36,13 @@ export function QuickCaptureBar() {
         ? "Could not save your task. Try again."
         : null;
 
+  const handleRetry = () => {
+    mutation.reset();
+    void mutation.mutateAsync({
+      description: register("description").value?.trim() ?? "",
+    });
+  };
+
   return (
     <form
       onSubmit={onSubmit}
@@ -70,12 +77,18 @@ export function QuickCaptureBar() {
           </p>
         )}
         {submitError && (
-          <p
-            className="mt-1 text-sm text-red-600 dark:text-red-400"
-            role="alert"
-          >
-            {submitError}
-          </p>
+          <div className="mt-1 flex items-center gap-2" role="alert">
+            <p className="text-sm text-red-600 dark:text-red-400">
+              {submitError}
+            </p>
+            <button
+              type="button"
+              onClick={handleRetry}
+              className="text-xs font-medium text-red-800 underline dark:text-red-200"
+            >
+              Retry
+            </button>
+          </div>
         )}
       </div>
       <div className="flex shrink-0 sm:pt-7">

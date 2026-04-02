@@ -8,18 +8,22 @@ import { getApiBaseUrl } from "@/shared/api/env";
 
 export function TodoHome() {
   const base = getApiBaseUrl();
-  const { data, isLoading, isError, error } = useTodosQuery();
+  const { data, isLoading, isError, error, refetch, isFetching } =
+    useTodosQuery();
 
   const configMessage = !base
     ? "App is missing API configuration. Set NEXT_PUBLIC_API_BASE_URL."
     : null;
 
-  const listMessage =
+  const errorMessage =
     isError && error instanceof ApiError
       ? error.message
       : isError
         ? "Could not load tasks. Try again."
-        : null;
+        : undefined;
+
+  const requestId =
+    isError && error instanceof ApiError ? error.requestId : undefined;
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-4 px-4 py-8">
@@ -40,14 +44,6 @@ export function TodoHome() {
           {configMessage}
         </div>
       )}
-      {listMessage && (
-        <div
-          role="alert"
-          className="mx-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
-        >
-          {listMessage}
-        </div>
-      )}
       <section aria-labelledby="todo-list-heading">
         <h2 id="todo-list-heading" className="sr-only">
           Your tasks
@@ -61,9 +57,15 @@ export function TodoHome() {
           </p>
         ) : (
           <TodoList
-            todos={data?.data.todos ?? []}
+            todos={data?.data?.todos ?? []}
             isLoading={isLoading}
             loadFailed={isError}
+            errorMessage={errorMessage}
+            requestId={requestId}
+            onRetry={() => {
+              void refetch().catch(() => {});
+            }}
+            isRetrying={isFetching}
           />
         )}
       </section>

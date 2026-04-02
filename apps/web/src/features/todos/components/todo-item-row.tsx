@@ -46,6 +46,19 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
         ? "Failed to delete"
         : null;
 
+  const handleRetryToggle = () => {
+    completeMutation.reset();
+    completeMutation.mutate({
+      id: todo.id,
+      isCompleted: !todo.isCompleted,
+    });
+  };
+
+  const handleRetryDelete = () => {
+    deleteMutation.reset();
+    deleteMutation.mutate(todo.id);
+  };
+
   const inlineError = completeError ?? deleteError;
   const showBothErrors = completeError && deleteError;
 
@@ -82,15 +95,41 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
         {inlineError && (
           <div
             role="alert"
-            className="mt-1 text-xs text-red-600 dark:text-red-400"
+            className="mt-1 flex flex-col gap-1 text-xs text-red-600 dark:text-red-400"
           >
             {showBothErrors ? (
               <>
-                <p>{completeError}</p>
-                <p>{deleteError}</p>
+                <div className="flex items-center gap-2">
+                  <p>{completeError}</p>
+                  <button
+                    onClick={handleRetryToggle}
+                    className="font-medium underline hover:text-red-700 dark:hover:text-red-300"
+                  >
+                    Retry
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <p>{deleteError}</p>
+                  <button
+                    onClick={handleRetryDelete}
+                    className="font-medium underline hover:text-red-700 dark:hover:text-red-300"
+                  >
+                    Retry
+                  </button>
+                </div>
               </>
             ) : (
-              <p>{inlineError}</p>
+              <div className="flex items-center gap-2">
+                <p>{inlineError}</p>
+                <button
+                  onClick={
+                    completeError ? handleRetryToggle : handleRetryDelete
+                  }
+                  className="font-medium underline hover:text-red-700 dark:hover:text-red-300"
+                >
+                  Retry
+                </button>
+              </div>
             )}
           </div>
         )}

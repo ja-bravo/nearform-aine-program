@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-04-01T16:30:36Z"
-last_updated: "2026-04-02T19:05:00Z"
+last_updated: "2026-04-02T20:30:00Z"
 project: nearform-aine-bmad
 project_key: NOKEY
 tracking_system: file-system
@@ -55,8 +55,8 @@ development_status:
   2-3-build-todo-row-interactions-and-visual-state-distinction: done
   epic-2-retrospective: optional
 
-  epic-3: backlog
-  3-1-establish-canonical-client-error-and-status-handling: backlog
+  epic-3: in-progress
+  3-1-establish-canonical-client-error-and-status-handling: done
   3-2-implement-persistence-status-badge-lifecycle: backlog
   3-3-add-inline-retry-for-failed-item-persistence: backlog
   3-4-add-offline-read-only-banner-and-write-safeguards: backlog

@@ -1,37 +1,42 @@
 import type { TodoDto } from "@/shared/api/schemas";
+import { ErrorMessage, LoadingState } from "@/shared/ui";
 import { TodoItemRow } from "./todo-item-row";
 
 type TodoListProps = {
   todos: TodoDto[];
   isLoading: boolean;
   loadFailed: boolean;
+  errorMessage?: string;
+  requestId?: string;
+  onRetry?: () => void;
+  isRetrying?: boolean;
 };
 
-export function TodoList({ todos, isLoading, loadFailed }: TodoListProps) {
+export function TodoList({
+  todos,
+  isLoading,
+  loadFailed,
+  errorMessage,
+  requestId,
+  onRetry,
+  isRetrying,
+}: TodoListProps) {
   if (isLoading) {
-    return (
-      <div
-        className="flex flex-col gap-2 p-2"
-        role="status"
-        aria-live="polite"
-        aria-busy="true"
-      >
-        <span className="sr-only">Loading tasks</span>
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="h-14 animate-pulse rounded-lg bg-zinc-200/80 dark:bg-zinc-800/80"
-          />
-        ))}
-      </div>
-    );
+    return <LoadingState message="Loading tasks" />;
   }
 
   if (loadFailed) {
     return (
-      <p className="p-2 text-sm text-zinc-500 dark:text-zinc-400">
-        Task list is unavailable until loading succeeds.
-      </p>
+      <ErrorMessage
+        message={
+          errorMessage && errorMessage.trim() !== ""
+            ? errorMessage
+            : "Task list is unavailable until loading succeeds."
+        }
+        requestId={requestId}
+        onRetry={onRetry}
+        isRetrying={isRetrying}
+      />
     );
   }
 
