@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-04-01T16:30:36Z"
-last_updated: "2026-04-03T18:59:00Z"
+last_updated: "2026-04-03T19:00:00Z"
 project: nearform-aine-bmad
 project_key: NOKEY
 tracking_system: file-system
@@ -62,8 +62,8 @@ development_status:
   3-4-add-offline-read-only-banner-and-write-safeguards: done
   epic-3-retrospective: optional
 
-  epic-4: backlog
-  4-1-implement-responsive-layout-and-touch-ready-controls: backlog
+  epic-4: done
+  4-1-implement-responsive-layout-and-touch-ready-controls: done
   4-2-deliver-keyboard-only-core-flow: backlog
   4-3-ensure-semantic-accessibility-and-non-color-status-cues: backlog
   4-4-validate-accessibility-and-responsive-quality-gates: backlog

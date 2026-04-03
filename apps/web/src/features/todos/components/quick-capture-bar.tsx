@@ -72,7 +72,7 @@ export function QuickCaptureBar() {
   return (
     <form
       onSubmit={onSubmit}
-      className="flex flex-col gap-2 p-2 sm:flex-row sm:items-start"
+      className="flex flex-col gap-2 p-2 sm:flex-row sm:items-end"
     >
       <div className="min-w-0 flex-1">
         <label
@@ -86,7 +86,7 @@ export function QuickCaptureBar() {
           type="text"
           autoComplete="off"
           placeholder="What needs doing?"
-          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm outline-none ring-zinc-400 focus-visible:ring-2 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50 dark:ring-zinc-500"
+          className="h-12 w-full rounded-lg border border-zinc-300 bg-white px-4 text-sm text-zinc-900 shadow-sm outline-none ring-zinc-400 focus-visible:ring-2 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50 dark:ring-zinc-500"
           aria-invalid={errors.description || !!lastError ? "true" : "false"}
           aria-describedby={
             [
@@ -133,11 +133,11 @@ export function QuickCaptureBar() {
           )}
         </div>
       </div>
-      <div className="flex shrink-0 sm:pt-7">
+      <div className="flex shrink-0">
         <button
           type="submit"
           disabled={mutation.isPending || isReadOnly}
-          className="h-10 w-full rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:focus-visible:outline-zinc-100 sm:w-auto"
+          className="h-12 w-full rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:focus-visible:outline-zinc-100 sm:w-auto"
         >
           {mutation.isPending ? "Saving…" : "Add task"}
         </button>

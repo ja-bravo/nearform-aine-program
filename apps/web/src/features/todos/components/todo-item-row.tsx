@@ -85,36 +85,38 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
   const deleteErrorId = `error-delete-${todo.id}`;
 
   return (
-    <li className="flex items-start gap-3 rounded-lg border border-zinc-200 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-      <input
-        type="checkbox"
-        checked={todo.isCompleted}
-        disabled={isInteractionDisabled}
-        onChange={() => {
-          completeMutation.reset();
-          completeMutation.mutate(
-            {
-              id: todo.id,
-              isCompleted: !todo.isCompleted,
-            },
-            {
-              onSuccess: () => setLastCompleteError(null),
-              onError: (error) =>
-                setLastCompleteError(
-                  error instanceof ApiError
-                    ? error.message
-                    : ERROR_UPDATE_FALLBACK
-                ),
-            }
-          );
-        }}
-        className="mt-1 h-4 w-4 shrink-0 rounded border-zinc-300 text-zinc-900 disabled:opacity-60 dark:border-zinc-600"
-        aria-label={`Mark '${todo.description || "task"}' as ${todo.isCompleted ? "active" : "complete"}`}
-        aria-describedby={lastCompleteError ? completeErrorId : undefined}
-      />
+    <li className="flex items-start gap-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-6">
+      <div className="flex shrink-0 items-center justify-center p-2 -m-2">
+        <input
+          type="checkbox"
+          checked={todo.isCompleted}
+          disabled={isInteractionDisabled}
+          onChange={() => {
+            completeMutation.reset();
+            completeMutation.mutate(
+              {
+                id: todo.id,
+                isCompleted: !todo.isCompleted,
+              },
+              {
+                onSuccess: () => setLastCompleteError(null),
+                onError: (error) =>
+                  setLastCompleteError(
+                    error instanceof ApiError
+                      ? error.message
+                      : ERROR_UPDATE_FALLBACK
+                  ),
+              }
+            );
+          }}
+          className="h-6 w-6 shrink-0 cursor-pointer rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-600 dark:focus:ring-zinc-400"
+          aria-label={`Mark '${todo.description || "task"}' as ${todo.isCompleted ? "active" : "complete"}`}
+          aria-describedby={lastCompleteError ? completeErrorId : undefined}
+        />
+      </div>
       <div className="min-w-0 flex-1">
         <p
-          className={`text-sm font-medium ${
+          className={`break-all text-sm font-medium ${
             todo.isCompleted
               ? "text-zinc-400 line-through dark:text-zinc-500"
               : "text-zinc-900 dark:text-zinc-50"
@@ -200,10 +202,11 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
         }}
         aria-label={`Delete '${todo.description || "task"}'`}
         aria-describedby={lastDeleteError ? deleteErrorId : undefined}
-        className="shrink-0 rounded px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 disabled:opacity-60 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+        className="h-11 shrink-0 truncate rounded-lg px-4 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 disabled:cursor-not-allowed disabled:opacity-60 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
       >
         {deleteMutation.isPending ? "Deleting…" : "Delete"}
       </button>
     </li>
+  );
   );
 }
