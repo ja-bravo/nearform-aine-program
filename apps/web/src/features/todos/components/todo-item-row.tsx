@@ -1,9 +1,15 @@
 "use client";
 
+import { FC, ReactNode } from "react";
 import { ApiError } from "@/shared/api/api-error";
 import type { TodoDto } from "@/shared/api/schemas";
 import { useCompleteTodoMutation } from "@/features/todos/hooks/use-complete-todo-mutation";
 import { useDeleteTodoMutation } from "@/features/todos/hooks/use-delete-todo-mutation";
+import { usePersistenceStatus } from "@/features/todos/hooks/use-persistence-status";
+import {
+  PersistenceStatusBadge,
+  type PersistenceStatus,
+} from "./persistence-status-badge";
 
 const createdAtFormatter = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
@@ -31,6 +37,12 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
   const deleteMutation = useDeleteTodoMutation();
 
   const isPending = completeMutation.isPending || deleteMutation.isPending;
+
+  const persistenceStatus = usePersistenceStatus({
+    isSuccess: completeMutation.isSuccess || deleteMutation.isSuccess,
+    isError: completeMutation.isError || deleteMutation.isError,
+    isPending,
+  });
 
   const completeError =
     completeMutation.error instanceof ApiError
@@ -92,47 +104,50 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
           Added {formatCreatedAt(todo.createdAt)}
         </p>
-        {inlineError && (
-          <div
-            role="alert"
-            className="mt-1 flex flex-col gap-1 text-xs text-red-600 dark:text-red-400"
-          >
-            {showBothErrors ? (
-              <>
+        <div className="mt-2 flex items-center gap-2">
+          <PersistenceStatusBadge status={persistenceStatus} />
+          {inlineError && (
+            <div
+              role="alert"
+              className="flex flex-col gap-1 text-xs text-red-600 dark:text-red-400"
+            >
+              {showBothErrors ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <p>{completeError}</p>
+                    <button
+                      onClick={handleRetryToggle}
+                      className="font-medium underline hover:text-red-700 dark:hover:text-red-300"
+                    >
+                      Retry update
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <p>{deleteError}</p>
+                    <button
+                      onClick={handleRetryDelete}
+                      className="font-medium underline hover:text-red-700 dark:hover:text-red-300"
+                    >
+                      Retry delete
+                    </button>
+                  </div>
+                </>
+              ) : (
                 <div className="flex items-center gap-2">
-                  <p>{completeError}</p>
+                  <p>{inlineError}</p>
                   <button
-                    onClick={handleRetryToggle}
+                    onClick={
+                      completeError ? handleRetryToggle : handleRetryDelete
+                    }
                     className="font-medium underline hover:text-red-700 dark:hover:text-red-300"
                   >
                     Retry
                   </button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <p>{deleteError}</p>
-                  <button
-                    onClick={handleRetryDelete}
-                    className="font-medium underline hover:text-red-700 dark:hover:text-red-300"
-                  >
-                    Retry
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center gap-2">
-                <p>{inlineError}</p>
-                <button
-                  onClick={
-                    completeError ? handleRetryToggle : handleRetryDelete
-                  }
-                  className="font-medium underline hover:text-red-700 dark:hover:text-red-300"
-                >
-                  Retry
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
       </div>
       <button
         type="button"

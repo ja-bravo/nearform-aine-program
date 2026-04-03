@@ -1,5 +1,6 @@
 "use client";
 
+import { FC } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -7,18 +8,31 @@ import {
   quickCaptureSchema,
 } from "@/features/todos/capture-schema";
 import { useCreateTodoMutation } from "@/features/todos/hooks/use-create-todo-mutation";
+import { usePersistenceStatus } from "@/features/todos/hooks/use-persistence-status";
 import { ApiError } from "@/shared/api/api-error";
+import {
+  PersistenceStatusBadge,
+  type PersistenceStatus,
+} from "./persistence-status-badge";
 
 export function QuickCaptureBar() {
   const mutation = useCreateTodoMutation();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    getValues,
   } = useForm<QuickCaptureValues>({
     resolver: zodResolver(quickCaptureSchema),
     defaultValues: { description: "" },
+  });
+
+  const persistenceStatus = usePersistenceStatus({
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    isPending: mutation.isPending,
   });
 
   const onSubmit = handleSubmit(async (values) => {
@@ -39,7 +53,7 @@ export function QuickCaptureBar() {
   const handleRetry = () => {
     mutation.reset();
     void mutation.mutateAsync({
-      description: register("description").value?.trim() ?? "",
+      description: getValues("description").trim(),
     });
   };
 
@@ -76,20 +90,23 @@ export function QuickCaptureBar() {
             {errors.description.message}
           </p>
         )}
-        {submitError && (
-          <div className="mt-1 flex items-center gap-2" role="alert">
-            <p className="text-sm text-red-600 dark:text-red-400">
-              {submitError}
-            </p>
-            <button
-              type="button"
-              onClick={handleRetry}
-              className="text-xs font-medium text-red-800 underline dark:text-red-200"
-            >
-              Retry
-            </button>
-          </div>
-        )}
+        <div className="mt-1 flex items-center gap-2">
+          <PersistenceStatusBadge status={persistenceStatus} />
+          {mutation.isError && (
+            <div className="flex items-center gap-2" role="alert">
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {submitError}
+              </p>
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="text-xs font-medium text-red-800 underline dark:text-red-200"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       <div className="flex shrink-0 sm:pt-7">
         <button
