@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export type PersistenceStatus = "saved" | "error" | null;
+export type PersistenceStatus = "saving" | "saved" | "error" | null;
 
 interface UsePersistenceStatusProps {
   isSuccess: boolean;
@@ -34,7 +34,9 @@ export function usePersistenceStatus({
   }, [isSuccess, isPending, timeoutMs]);
 
   let status: PersistenceStatus = null;
-  if (isError) {
+  if (isPending) {
+    status = "saving";
+  } else if (isError) {
     status = "error";
   } else if (showSaved) {
     status = "saved";
