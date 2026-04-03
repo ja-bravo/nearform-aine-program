@@ -6,6 +6,7 @@ import type { TodoDto } from "@/shared/api/schemas";
 import { useCompleteTodoMutation } from "@/features/todos/hooks/use-complete-todo-mutation";
 import { useDeleteTodoMutation } from "@/features/todos/hooks/use-delete-todo-mutation";
 import { usePersistenceStatus } from "@/features/todos/hooks/use-persistence-status";
+import { useConnectivity } from "@/shared/hooks/use-connectivity";
 import { PersistenceStatusBadge } from "./persistence-status-badge";
 
 const createdAtFormatter = new Intl.DateTimeFormat(undefined, {
@@ -35,6 +36,7 @@ const ERROR_DELETE_FALLBACK = "Failed to delete";
 export function TodoItemRow({ todo }: TodoItemRowProps) {
   const completeMutation = useCompleteTodoMutation();
   const deleteMutation = useDeleteTodoMutation();
+  const { isReadOnly } = useConnectivity();
 
   const [lastCompleteError, setLastCompleteError] = useState<string | null>(
     null
@@ -42,6 +44,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
   const [lastDeleteError, setLastDeleteError] = useState<string | null>(null);
 
   const isPending = completeMutation.isPending || deleteMutation.isPending;
+  const isInteractionDisabled = isPending || isReadOnly;
 
   const persistenceStatus = usePersistenceStatus({
     isSuccess: completeMutation.isSuccess || deleteMutation.isSuccess,
@@ -86,7 +89,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
       <input
         type="checkbox"
         checked={todo.isCompleted}
-        disabled={isPending}
+        disabled={isInteractionDisabled}
         onChange={() => {
           completeMutation.reset();
           completeMutation.mutate(
@@ -135,7 +138,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
                     <p id={completeErrorId}>{lastCompleteError}</p>
                     <button
                       onClick={handleRetryToggle}
-                      disabled={completeMutation.isPending}
+                      disabled={completeMutation.isPending || isReadOnly}
                       className="font-medium underline hover:text-red-700 disabled:no-underline disabled:opacity-60 dark:hover:text-red-300"
                     >
                       {completeMutation.isPending
@@ -147,7 +150,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
                     <p id={deleteErrorId}>{lastDeleteError}</p>
                     <button
                       onClick={handleRetryDelete}
-                      disabled={deleteMutation.isPending}
+                      disabled={deleteMutation.isPending || isReadOnly}
                       className="font-medium underline hover:text-red-700 disabled:no-underline disabled:opacity-60 dark:hover:text-red-300"
                     >
                       {deleteMutation.isPending ? "Retrying…" : "Retry delete"}
@@ -164,9 +167,9 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
                       lastCompleteError ? handleRetryToggle : handleRetryDelete
                     }
                     disabled={
-                      lastCompleteError
+                      (lastCompleteError
                         ? completeMutation.isPending
-                        : deleteMutation.isPending
+                        : deleteMutation.isPending) || isReadOnly
                     }
                     className="font-medium underline hover:text-red-700 disabled:no-underline disabled:opacity-60 dark:hover:text-red-300"
                   >
@@ -182,7 +185,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
       </div>
       <button
         type="button"
-        disabled={isPending}
+        disabled={isInteractionDisabled}
         onClick={() => {
           deleteMutation.reset();
           deleteMutation.mutate(todo.id, {

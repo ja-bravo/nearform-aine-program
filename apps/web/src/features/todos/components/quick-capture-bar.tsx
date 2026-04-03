@@ -9,6 +9,7 @@ import {
 } from "@/features/todos/capture-schema";
 import { useCreateTodoMutation } from "@/features/todos/hooks/use-create-todo-mutation";
 import { usePersistenceStatus } from "@/features/todos/hooks/use-persistence-status";
+import { useConnectivity } from "@/shared/hooks/use-connectivity";
 import { ApiError } from "@/shared/api/api-error";
 import { PersistenceStatusBadge } from "./persistence-status-badge";
 
@@ -17,6 +18,7 @@ const ERROR_MESSAGE_FALLBACK = "Could not save your task. Try again.";
 export function QuickCaptureBar() {
   const mutation = useCreateTodoMutation();
   const [lastError, setLastError] = useState<string | null>(null);
+  const { isReadOnly } = useConnectivity();
 
   const {
     register,
@@ -36,6 +38,7 @@ export function QuickCaptureBar() {
   });
 
   const onSubmit = handleSubmit(async (values) => {
+    if (isReadOnly) return;
     try {
       mutation.reset();
       await mutation.mutateAsync({
@@ -121,7 +124,7 @@ export function QuickCaptureBar() {
               <button
                 type="button"
                 onClick={handleRetry}
-                disabled={mutation.isPending}
+                disabled={mutation.isPending || isReadOnly}
                 className="text-xs font-medium text-red-800 underline disabled:no-underline disabled:opacity-60 dark:text-red-200"
               >
                 {mutation.isPending ? "Retrying…" : "Retry"}
@@ -133,7 +136,7 @@ export function QuickCaptureBar() {
       <div className="flex shrink-0 sm:pt-7">
         <button
           type="submit"
-          disabled={mutation.isPending}
+          disabled={mutation.isPending || isReadOnly}
           className="h-10 w-full rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:focus-visible:outline-zinc-100 sm:w-auto"
         >
           {mutation.isPending ? "Saving…" : "Add task"}

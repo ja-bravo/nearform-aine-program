@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { OfflineReadOnlyBanner } from "@/shared/ui/offline-read-only-banner";
 import { QueryProvider } from "./query-provider";
 
 const inter = Inter({
@@ -21,7 +22,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <OfflineReadOnlyBanner />
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );
