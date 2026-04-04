@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ApiError } from "@/shared/api/api-error";
 import type { TodoDto } from "@/shared/api/schemas";
 import { useCompleteTodoMutation } from "@/features/todos/hooks/use-complete-todo-mutation";
@@ -32,11 +32,13 @@ type TodoItemRowProps = {
 
 const ERROR_UPDATE_FALLBACK = "Failed to update";
 const ERROR_DELETE_FALLBACK = "Failed to delete";
+const QUICK_CAPTURE_INPUT_ID = "quick-capture-description";
 
 export function TodoItemRow({ todo }: TodoItemRowProps) {
   const completeMutation = useCompleteTodoMutation();
   const deleteMutation = useDeleteTodoMutation();
   const { isReadOnly } = useConnectivity();
+  const liRef = useRef<HTMLLIElement>(null);
 
   const [lastCompleteError, setLastCompleteError] = useState<string | null>(
     null
@@ -70,7 +72,20 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
 
   const handleRetryDelete = () => {
     deleteMutation.mutate(todo.id, {
-      onSuccess: () => setLastDeleteError(null),
+      onSuccess: () => {
+        setLastDeleteError(null);
+        // AC5: Focus the next or previous item's checkbox after deletion
+        const nextItem =
+          liRef.current?.nextElementSibling ||
+          liRef.current?.previousElementSibling;
+        const target =
+          nextItem?.querySelector('input[type="checkbox"]') ||
+          document.getElementById(QUICK_CAPTURE_INPUT_ID);
+
+        if (target instanceof HTMLElement) {
+          target.focus();
+        }
+      },
       onError: (error) =>
         setLastDeleteError(
           error instanceof ApiError ? error.message : ERROR_DELETE_FALLBACK
@@ -85,7 +100,10 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
   const deleteErrorId = `error-delete-${todo.id}`;
 
   return (
-    <li className="flex items-start gap-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-6">
+    <li
+      ref={liRef}
+      className="flex items-start gap-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-6"
+    >
       <div className="flex shrink-0 items-center justify-center p-2 -m-2">
         <input
           type="checkbox"
@@ -109,7 +127,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
               }
             );
           }}
-          className="h-6 w-6 shrink-0 cursor-pointer rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-600 dark:focus:ring-zinc-400"
+          className="h-6 w-6 shrink-0 cursor-pointer rounded border-zinc-300 text-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-600 dark:focus-visible:ring-zinc-400"
           aria-label={`Mark '${todo.description || "task"}' as ${todo.isCompleted ? "active" : "complete"}`}
           aria-describedby={lastCompleteError ? completeErrorId : undefined}
         />
@@ -141,7 +159,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
                     <button
                       onClick={handleRetryToggle}
                       disabled={completeMutation.isPending || isReadOnly}
-                      className="font-medium underline hover:text-red-700 disabled:no-underline disabled:opacity-60 dark:hover:text-red-300"
+                      className="rounded font-medium underline hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:no-underline disabled:opacity-60 dark:hover:text-red-300 dark:focus-visible:ring-red-400"
                     >
                       {completeMutation.isPending
                         ? "Retrying…"
@@ -153,7 +171,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
                     <button
                       onClick={handleRetryDelete}
                       disabled={deleteMutation.isPending || isReadOnly}
-                      className="font-medium underline hover:text-red-700 disabled:no-underline disabled:opacity-60 dark:hover:text-red-300"
+                      className="rounded font-medium underline hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:no-underline disabled:opacity-60 dark:hover:text-red-300 dark:focus-visible:ring-red-400"
                     >
                       {deleteMutation.isPending ? "Retrying…" : "Retry delete"}
                     </button>
@@ -173,7 +191,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
                         ? completeMutation.isPending
                         : deleteMutation.isPending) || isReadOnly
                     }
-                    className="font-medium underline hover:text-red-700 disabled:no-underline disabled:opacity-60 dark:hover:text-red-300"
+                    className="rounded font-medium underline hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:no-underline disabled:opacity-60 dark:hover:text-red-300 dark:focus-visible:ring-red-400"
                   >
                     {completeMutation.isPending || deleteMutation.isPending
                       ? "Retrying…"
@@ -191,7 +209,20 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
         onClick={() => {
           deleteMutation.reset();
           deleteMutation.mutate(todo.id, {
-            onSuccess: () => setLastDeleteError(null),
+            onSuccess: () => {
+              setLastDeleteError(null);
+              // AC5: Focus the next or previous item's checkbox after deletion
+              const nextItem =
+                liRef.current?.nextElementSibling ||
+                liRef.current?.previousElementSibling;
+              const target =
+                nextItem?.querySelector('input[type="checkbox"]') ||
+                document.getElementById(QUICK_CAPTURE_INPUT_ID);
+
+              if (target instanceof HTMLElement) {
+                target.focus();
+              }
+            },
             onError: (error) =>
               setLastDeleteError(
                 error instanceof ApiError
@@ -202,11 +233,10 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
         }}
         aria-label={`Delete '${todo.description || "task"}'`}
         aria-describedby={lastDeleteError ? deleteErrorId : undefined}
-        className="h-11 shrink-0 truncate rounded-lg px-4 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 disabled:cursor-not-allowed disabled:opacity-60 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+        className="h-11 shrink-0 truncate rounded-lg px-4 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 dark:focus-visible:ring-zinc-400"
       >
         {deleteMutation.isPending ? "Deleting…" : "Delete"}
       </button>
     </li>
-  );
   );
 }

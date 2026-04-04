@@ -1,5 +1,5 @@
 # generated: 2026-04-01T16:30:36Z
-# last_updated: 2026-04-02T00:45:00Z
+# last_updated: 2026-04-03T20:00:00Z
 # project: nearform-aine-bmad
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-04-01T16:30:36Z"
-last_updated: "2026-04-03T19:00:00Z"
+last_updated: "2026-04-03T20:30:00Z"
 project: nearform-aine-bmad
 project_key: NOKEY
 tracking_system: file-system
@@ -62,9 +62,11 @@ development_status:
   3-4-add-offline-read-only-banner-and-write-safeguards: done
   epic-3-retrospective: optional
 
-  epic-4: done
+  epic-4: in-progress
   4-1-implement-responsive-layout-and-touch-ready-controls: done
-  4-2-deliver-keyboard-only-core-flow: backlog
-  4-3-ensure-semantic-accessibility-and-non-color-status-cues: backlog
+  4-2-deliver-keyboard-only-core-flow: done
+  4-3-ensure-semantic-accessibility-and-non-color-status-cues: ready-for-dev
   4-4-validate-accessibility-and-responsive-quality-gates: backlog
+  4-5-fix-cors-policy-to-allow-patch-requests: done
+  4-6-fix-delete-todo-bad-request-due-to-empty-body: done
   epic-4-retrospective: optional

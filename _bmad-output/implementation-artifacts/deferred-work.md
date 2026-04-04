@@ -10,3 +10,6 @@
 
 - Missing delete confirmation dialog [todo-item-row.tsx] — deferred, pre-existing (UX enhancement)
 - Error handling visibility (notification system) [todo-item-row.tsx] — deferred, pre-existing (architectural preference)
+
+## Deferred from: code review of 4-2-deliver-keyboard-only-core-flow.md (2026-04-03)
+- [Review][Defer] Inefficient per-row refs for focus management [todo-item-row.tsx:40] — Adding a `useRef` to every single `TodoItemRow` in a potentially massive list just to handle a focus jump on delete is inefficient. This logic belongs in a parent container that manages the list's focus state.

@@ -26,7 +26,10 @@ export async function createServer(options?: CreateServerOptions) {
     genReqId: () => randomUUID(),
   });
 
-  await app.register(cors, { origin: parseCorsOrigins() });
+  await app.register(cors, {
+    origin: parseCorsOrigins(),
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  });
 
   app.setErrorHandler((error, request, reply) => {
     const err = error as Error & { statusCode?: number; code?: string };

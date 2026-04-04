@@ -26,6 +26,7 @@ export function QuickCaptureBar() {
     formState: { errors },
     reset,
     getValues,
+    setFocus,
   } = useForm<QuickCaptureValues>({
     resolver: zodResolver(quickCaptureSchema),
     defaultValues: { description: "" },
@@ -37,6 +38,15 @@ export function QuickCaptureBar() {
     isPending: mutation.isPending,
   });
 
+  const handleSuccess = () => {
+    setLastError(null);
+    reset({ description: "" });
+    // AC5: Return focus to support rapid-fire entry, but only if not in read-only mode
+    if (!isReadOnly) {
+      setFocus("description");
+    }
+  };
+
   const onSubmit = handleSubmit(async (values) => {
     if (isReadOnly) return;
     try {
@@ -44,8 +54,7 @@ export function QuickCaptureBar() {
       await mutation.mutateAsync({
         description: values.description.trim(),
       });
-      setLastError(null);
-      reset({ description: "" });
+      handleSuccess();
     } catch (error) {
       setLastError(
         error instanceof ApiError ? error.message : ERROR_MESSAGE_FALLBACK
@@ -58,8 +67,7 @@ export function QuickCaptureBar() {
       await mutation.mutateAsync({
         description: getValues("description").trim(),
       });
-      setLastError(null);
-      reset({ description: "" });
+      handleSuccess();
     } catch (error) {
       setLastError(
         error instanceof ApiError ? error.message : ERROR_MESSAGE_FALLBACK
@@ -86,7 +94,7 @@ export function QuickCaptureBar() {
           type="text"
           autoComplete="off"
           placeholder="What needs doing?"
-          className="h-12 w-full rounded-lg border border-zinc-300 bg-white px-4 text-sm text-zinc-900 shadow-sm outline-none ring-zinc-400 focus-visible:ring-2 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50 dark:ring-zinc-500"
+          className="h-12 w-full rounded-lg border border-zinc-300 bg-white px-4 text-sm text-zinc-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50 dark:focus-visible:ring-zinc-400"
           aria-invalid={errors.description || !!lastError ? "true" : "false"}
           aria-describedby={
             [
@@ -125,7 +133,7 @@ export function QuickCaptureBar() {
                 type="button"
                 onClick={handleRetry}
                 disabled={mutation.isPending || isReadOnly}
-                className="text-xs font-medium text-red-800 underline disabled:no-underline disabled:opacity-60 dark:text-red-200"
+                className="rounded text-xs font-medium text-red-800 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:no-underline disabled:opacity-60 dark:text-red-200 dark:focus-visible:ring-red-400"
               >
                 {mutation.isPending ? "Retrying…" : "Retry"}
               </button>
@@ -137,7 +145,7 @@ export function QuickCaptureBar() {
         <button
           type="submit"
           disabled={mutation.isPending || isReadOnly}
-          className="h-12 w-full rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:focus-visible:outline-zinc-100 sm:w-auto"
+          className="h-12 w-full rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:focus-visible:ring-zinc-100 sm:w-auto"
         >
           {mutation.isPending ? "Saving…" : "Add task"}
         </button>

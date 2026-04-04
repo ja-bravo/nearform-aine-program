@@ -15,12 +15,15 @@ export async function fetchJson<T>(
   const url = `${base}${path.startsWith("/") ? path : `/${path}`}`;
   let res: Response;
   try {
+    const hasBody = Boolean(init.body);
+    const headers = {
+      ...(hasBody ? { "Content-Type": "application/json" } : {}),
+      ...init.headers,
+    } as Record<string, string>;
+
     res = await fetch(url, {
       ...init,
-      headers: {
-        "Content-Type": "application/json",
-        ...init.headers,
-      },
+      headers,
     });
   } catch {
     throw new ApiError("Could not reach the server. Check your connection.");

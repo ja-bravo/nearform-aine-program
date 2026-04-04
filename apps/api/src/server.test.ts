@@ -49,6 +49,36 @@ describe("cors", () => {
     );
     await app.close();
   });
+
+  it("allows PATCH in Access-Control-Allow-Methods", async () => {
+    const app = await createServer();
+    await app.ready();
+    const res = await app.inject({
+      method: "OPTIONS",
+      url: "/api/v1/todos/123",
+      headers: {
+        origin: "http://localhost:3000",
+        "access-control-request-method": "PATCH",
+      },
+    });
+    expect(res.statusCode).toBe(204);
+    expect(res.headers["access-control-allow-methods"]).toContain("PATCH");
+    await app.close();
+  });
+
+  it("DELETE without Content-Type header and empty body returns 204 or 404 (not 400)", async () => {
+    const app = await createServer();
+    await app.ready();
+    const res = await app.inject({
+      method: "DELETE",
+      url: "/api/v1/todos/1e4f0572-9f21-4795-bd70-343c370f485d",
+      // no content-type
+    });
+    // It should not be 400. It could be 404 because we didn't mock repo,
+    // or 204 if there was a real DB. But 400 means body parser failed.
+    expect(res.statusCode).not.toBe(400);
+    await app.close();
+  });
 });
 
 describe("healthz", () => {
