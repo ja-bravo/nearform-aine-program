@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-04-04T13:00:00Z"
-  last_updated: "2026-04-04T18:00:00Z"
+  last_updated: "2026-04-04T18:30:00Z"
   project: nearform-aine-bmad
   project_key: NOKEY
   tracking_system: file-system
@@ -74,6 +74,6 @@ development_status:
   epic-5: in-progress
   5-1-implement-core-journey-e2e-test-suite: done
   5-2-configure-k6-performance-validation-suite: done
-  5-3-establish-coverage-reporting-and-70-quality-gate: backlog
+  5-3-establish-coverage-reporting-and-70-quality-gate: done
   5-4-harden-ci-pipelines-and-resolve-type-debt: done
   epic-5-retrospective: optional

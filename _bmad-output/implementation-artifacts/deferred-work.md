@@ -17,3 +17,7 @@
 ## Deferred from: code review of 4-3-ensure-semantic-accessibility-and-non-color-status-cues.md (2026-04-04)
 - Verbose announcements: Including full `todo.description` in every toggle/delete announcement might be too much for power users.
 - Property mismatch in docs vs code: Spec uses `todo.text` but code uses `todo.description`.
+
+## Deferred from: code review of 5-3-establish-coverage-reporting-and-70-quality-gate (2026-04-04)
+
+- Coverage Threshold Risk (70%): 70% is low/mediocre. Also, edge cases when exactly at 70% might cause flaky failures. Lacks `exclude` patterns for noisy files.

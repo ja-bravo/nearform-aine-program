@@ -12,13 +12,13 @@ describe("OfflineReadOnlyBanner", () => {
     cleanup();
   });
 
-  it("renders the offline message when isOnline is false", () => {
+  it("renders the offline message when isOnline is false", async () => {
     act(() => {
       onlineManager.setOnline(false);
     });
     render(<OfflineReadOnlyBanner />);
     expect(
-      screen.getByText(/Offline: You are currently disconnected/i)
+      await screen.findByText(/Offline: You are currently disconnected/i)
     ).toBeInTheDocument();
   });
 
@@ -27,12 +27,12 @@ describe("OfflineReadOnlyBanner", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("has the correct warning styles", () => {
+  it("has the correct warning styles", async () => {
     act(() => {
       onlineManager.setOnline(false);
     });
     render(<OfflineReadOnlyBanner />);
-    const banner = screen.getByRole("alert");
+    const banner = await screen.findByRole("alert");
     // Verify it has warning background and text color
     expect(banner).toHaveClass("bg-[#A15504]");
     expect(banner).toHaveClass("text-white");

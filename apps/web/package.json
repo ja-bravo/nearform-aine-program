@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "quality-gate": "pnpm test:e2e --project=chromium --grep \"@a11y|@responsive\""
   },
@@ -37,6 +38,7 @@
     "jsdom": "26.1.0",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "3.2.4"
+    "vitest": "3.2.4",
+    "@vitest/coverage-v8": "3.2.4"
   }
 }

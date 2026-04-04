@@ -30,13 +30,10 @@ test.describe("Todo Recovery and Failure", () => {
     await input.fill(todoText);
     await input.press("Enter");
 
-    // Verify "Not saved" and "Retry"
-    const todoRow = page
-      .getByTestId("todo-item-row")
-      .filter({ hasText: todoText });
-
-    await expect(todoRow.getByText("Not saved")).toBeVisible();
-    const retryButton = todoRow.getByRole("button", { name: "Retry" });
+    // Verify "Not saved" and "Retry" in the quick capture bar
+    const bar = page.getByTestId("quick-capture-bar");
+    await expect(bar.getByText("Not saved")).toBeVisible();
+    const retryButton = bar.getByRole("button", { name: "Retry" });
     await expect(retryButton).toBeVisible();
 
     // Remove interception for next attempt
@@ -45,8 +42,11 @@ test.describe("Todo Recovery and Failure", () => {
     // Click retry
     await retryButton.click();
 
-    // Verify success
-    await expect(todoRow.getByText("Saved")).toBeVisible();
+    // Verify success - row should now appear and status in bar should be 'Saved'
+    await expect(bar.getByText("Saved")).toBeVisible();
+    const todoRow = page
+      .getByTestId("todo-item-row")
+      .filter({ hasText: todoText });
     await expect(todoRow).toBeVisible();
   });
 });

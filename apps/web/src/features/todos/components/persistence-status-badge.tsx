@@ -110,7 +110,7 @@ export const PersistenceStatusBadge: FC<PersistenceStatusBadgeProps> = ({
         status ? "scale-100 opacity-100" : "scale-95 opacity-0"
       }`}
     >
-      {currentStatus && (
+      {(status || shouldRender) && currentStatus && (
         <span
           className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${currentStatus.className}`}
         >
