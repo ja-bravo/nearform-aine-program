@@ -1,5 +1,4 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import SQL from "@nearform/sql";
 import { createTodoRepository } from "./todo-repository.js";
 import { getPool } from "../../shared/db/pool.js";
 
@@ -15,7 +14,7 @@ describe("TodoRepository", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (getPool as any).mockReturnValue(mockPool);
+    (getPool as ReturnType<typeof vi.fn>).mockReturnValue(mockPool);
   });
 
   describe("insertTodo", () => {

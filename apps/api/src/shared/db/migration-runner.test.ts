@@ -1,11 +1,9 @@
-import SQL from "@nearform/sql";
-import { randomUUID } from "crypto";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { readFile } from "fs/promises";
 import { dirname, join } from "path";
-import { afterAll, describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { fileURLToPath } from "url";
 import { getMigrationsGlob, runMigrations } from "./migration-runner.js";
-import { closePool, getPool, pingDbWithNearformSql } from "./pool.js";
 import pg from "pg";
 import Postgrator from "postgrator";
 

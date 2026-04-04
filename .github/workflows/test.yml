@@ -12,6 +12,7 @@ env:
   DATABASE_URL: postgresql://todo:todo@localhost:5432/todo
   NEXT_PUBLIC_API_BASE_URL: http://localhost:3001
   BURN_IN_ITERATIONS: 5
+  TURBO_CACHE_DIR: .turbo
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -33,6 +34,13 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Turbo Cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
       - name: Lint
         run: pnpm turbo run lint
       - name: Typecheck
@@ -54,6 +62,13 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Turbo Cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
       - name: Build
         run: pnpm turbo run build
 
@@ -87,6 +102,13 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Turbo Cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
       - name: Run unit tests with coverage
         run: pnpm turbo run test:coverage
         env:
@@ -134,6 +156,13 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Turbo Cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
@@ -142,9 +171,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-playwright-
       - name: Install Playwright browsers
-        run: pnpm --filter web exec playwright install --with-deps chromium
+        working-directory: apps/web
+        run: pnpm exec playwright install --with-deps chromium
       - name: Run E2E tests
-        run: pnpm turbo run test:e2e -- --shard=${{ matrix.shard || 1 }}/4
+        run: pnpm turbo run test:e2e -- --project=chromium --shard=${{ matrix.shard || 1 }}/4
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           NEXT_PUBLIC_API_BASE_URL: ${{ env.NEXT_PUBLIC_API_BASE_URL }}
@@ -191,13 +221,23 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Turbo Cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
       - name: Restore Playwright browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
       - name: Install Playwright browsers
-        run: pnpm --filter web exec playwright install --with-deps chromium
+        working-directory: apps/web
+        run: pnpm exec playwright install --with-deps chromium
       - name: Detect changed E2E specs
         id: changed-specs
         run: |
@@ -225,7 +265,7 @@ jobs:
             echo "🔥 Burn-in iteration $i/${{ env.BURN_IN_ITERATIONS }}"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             # Security: SPECS referenced as env var
-            pnpm turbo run test:e2e -- "$SPECS" || exit 1
+            pnpm turbo run test:e2e -- --project=chromium "$SPECS" || exit 1
           done
           echo "✅ Burn-in complete - no flaky tests detected"
       - name: Upload artifacts
@@ -267,6 +307,13 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Turbo Cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
       - name: Start API
         run: pnpm --filter api start > api.log 2>&1 &
         env:
@@ -277,14 +324,19 @@ jobs:
           NEXT_PUBLIC_API_BASE_URL: ${{ env.NEXT_PUBLIC_API_BASE_URL }}
       - name: Wait for services
         run: |
-          npx wait-on --timeout 60000 http://localhost:3001/healthz/ready http://localhost:3000/ || {
-            echo "❌ Services failed to start within 60s"
+          npx wait-on --timeout 120000 http://localhost:3001/healthz/ready http://localhost:3000/ || {
+            echo "❌ Services failed to start within 120s"
             echo "--- API Logs ---"
-            cat api.log
+            [ -f api.log ] && cat api.log || echo "api.log not found"
             echo "--- Web Logs ---"
-            cat web.log
+            [ -f web.log ] && cat web.log || echo "web.log not found"
             exit 1
           }
+      - name: Axe-core & Responsive checks
+        run: pnpm turbo run quality-gate
+        env:
+          SKIP_PW_WEBSERVER: "1"
+          BASE_URL: http://localhost:3000
       - name: Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
         with:

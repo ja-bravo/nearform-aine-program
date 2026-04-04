@@ -63,6 +63,7 @@ describe("pool", () => {
     it("calls query on the pool", async () => {
       process.env.DATABASE_URL = "postgres://localhost:5432/test";
       const pool = getPool();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (pool.query as any).mockResolvedValueOnce({ rows: [{ one: 1 }] });
 
       await pingDbWithNearformSql();
