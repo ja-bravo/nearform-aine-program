@@ -66,7 +66,7 @@ development_status:
   4-1-implement-responsive-layout-and-touch-ready-controls: done
   4-2-deliver-keyboard-only-core-flow: done
   4-3-ensure-semantic-accessibility-and-non-color-status-cues: done
-  4-4-validate-accessibility-and-responsive-quality-gates: review
+  4-4-validate-accessibility-and-responsive-quality-gates: done
   4-5-fix-cors-policy-to-allow-patch-requests: done
   4-6-fix-delete-todo-bad-request-due-to-empty-body: done
   epic-4-retrospective: optional

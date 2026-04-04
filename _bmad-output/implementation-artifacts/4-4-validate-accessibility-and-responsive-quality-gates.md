@@ -1,6 +1,6 @@
 # Story 4.4: Validate Accessibility and Responsive Quality Gates
 
-Status: review
+Status: done
 
 <!-- Note: This story is created by the BMad Method story-creation workflow. -->
 
@@ -18,6 +18,13 @@ Status: review
 - Encountered port 3000 conflict with Docker `web` service. Resolved by stopping the docker container for local testing.
 - Fixed E2E offline test by changing the sequence (goto first, then setOffline) and adding a manual `offline` event trigger.
 - Fixed regression in `OfflineReadOnlyBanner.spec.tsx` where test was out of sync with actual implementation.
+- **Review Updates:**
+  - Parameterized `baseURL` in Playwright config.
+  - Added interaction flow to responsive E2E tests.
+  - Aligned viewports with Tailwind breakpoints (640, 768, 1024).
+  - Added animation handling and explicit state cleanup in a11y tests.
+  - Added `data-testid` to inputs and buttons for better robustness.
+  - Updated `quality-gate` script to run on all configured browsers.
 
 ### Completion Notes
 - Playwright E2E framework is fully functional.
@@ -30,6 +37,7 @@ Status: review
 - `apps/web/playwright.config.ts`
 - `apps/web/e2e/a11y/todo-list.axe.spec.ts`
 - `apps/web/e2e/responsive/todo-layout.spec.ts`
+- `apps/web/e2e/a11y/README.md`
 - `apps/web/src/features/todos/components/quick-capture-bar.tsx`
 - `apps/web/src/features/todos/components/todo-item-row.tsx`
 - `apps/web/src/shared/ui/offline-read-only-banner.tsx`
@@ -42,6 +50,7 @@ Status: review
   - Added responsive viewport quality gates.
   - Added `data-testid` for robust testing.
   - Fixed regression in `OfflineReadOnlyBanner` tests.
+  - **Refinement from Code Review:** Improved E2E reliability, interactive coverage, and alignment with Tailwind breakpoints.
 
 ## Story
 
@@ -98,6 +107,25 @@ so that **regressions are caught before release**.
   - [x] Add `"test:e2e": "playwright test"` to `apps/web/package.json`.
   - [x] Add `"quality-gate": "pnpm test:e2e --project=chromium --grep @a11y|@responsive"`.
   - [x] Verify all tests pass locally.
+
+### Review Findings
+
+- [x] [Review][Decision] Inconsistent Breakpoint Validation — The responsive tests use viewports (320, 768, 1024) that do not align with the Tailwind breakpoints used in the components (e.g., sm:640px). Resolution: Align viewports with Tailwind boundaries (640, 768, 1024).
+- [x] [Review][Patch] Brittle Manual Offline Event & Race [apps/web/e2e/a11y/todo-list.axe.spec.ts]
+- [x] [Review][Patch] Hardcoded Port 3000 / Conflict [apps/web/playwright.config.ts]
+- [x] [Review][Patch] Missing Interactive Flow in Responsive/A11y Tests [apps/web/e2e/responsive/todo-layout.spec.ts]
+- [x] [Review][Patch] Quality Gate Script Bypass [apps/web/package.json]
+- [x] [Review][Patch] Brittle Hex Code Assertions [apps/web/src/shared/ui/offline-read-only-banner.spec.tsx]
+- [x] [Review][Patch] Missing Data-Testids on Actionable Elements [apps/web/src/features/todos/components/quick-capture-bar.tsx]
+- [x] [Review][Patch] Race Condition in Scroll/Layout Validation [apps/web/e2e/responsive/todo-layout.spec.ts]
+- [x] [Review][Patch] Insecure WebServer Reuse Policy [apps/web/playwright.config.ts]
+- [x] [Review][Patch] Poor Error Diagnostics in a11y [apps/web/e2e/a11y/todo-list.axe.spec.ts]
+- [x] [Review][Patch] Missing Cleanup for Offline State [apps/web/e2e/a11y/todo-list.axe.spec.ts]
+- [x] [Review][Patch] Arbitrary Viewport Heights [apps/web/e2e/responsive/todo-layout.spec.ts]
+- [x] [Review][Patch] Accessibility Scan Mid-Animation [apps/web/e2e/a11y/todo-list.axe.spec.ts]
+- [x] [Review][Patch] Incomplete Responsive Component Coverage [apps/web/e2e/responsive/todo-layout.spec.ts]
+- [x] [Review][Patch] Missing Accessibility Documentation [apps/web/e2e/a11y/README.md]
+- [x] [Review][Patch] Unverified Custom Component (PersistenceStatusBadge) [apps/web/e2e/a11y/todo-list.axe.spec.ts]
 
 ## Developer Guardrails
 

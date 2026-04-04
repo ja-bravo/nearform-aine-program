@@ -1,27 +1,25 @@
 import { test, expect } from "@playwright/test";
 
 const breakpoints = [
-  { name: "Mobile", width: 320, height: 600 },
-  { name: "Tablet", width: 768, height: 1024 },
-  { name: "Desktop", width: 1024, height: 768 },
+  { name: "sm", width: 640, height: 800 },
+  { name: "md", width: 768, height: 800 },
+  { name: "lg", width: 1024, height: 800 },
 ];
 
 test.describe("Responsive Viewport Quality Gate @responsive", () => {
   for (const { name, width, height } of breakpoints) {
-    test(`should render correctly on ${name} (${width}x${height})`, async ({
+    test(`should render and interact correctly on ${name} (${width}x${height})`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height });
       await page.goto("/");
+      await page.waitForLoadState("networkidle");
 
-      // Wait for content to be ready
-      await expect(page.locator("main")).toBeVisible();
-
-      // Check for QuickCaptureBar
+      // Check for key components
       const quickCaptureBar = page.getByTestId("quick-capture-bar");
       await expect(quickCaptureBar).toBeVisible();
 
-      // Check that there's no horizontal scroll
+      // Ensure no horizontal scroll
       const isHorizontalScrollVisible = await page.evaluate(() => {
         return (
           document.documentElement.scrollWidth >
@@ -33,12 +31,38 @@ test.describe("Responsive Viewport Quality Gate @responsive", () => {
         `Horizontal scroll should not be present on ${name}`
       ).toBe(false);
 
-      // Verify that the main elements are within the viewport
+      // Verify layout boundaries for QuickCaptureBar
       const boundingBox = await quickCaptureBar.boundingBox();
+      expect(
+        boundingBox,
+        "QuickCaptureBar should have a valid layout"
+      ).not.toBeNull();
       if (boundingBox) {
         expect(boundingBox.x).toBeGreaterThanOrEqual(0);
         expect(boundingBox.x + boundingBox.width).toBeLessThanOrEqual(width);
       }
+
+      // [AC3] Core Flow: Add a todo
+      const input = page.getByTestId("quick-capture-input");
+      const addButton = page.getByTestId("quick-capture-submit");
+
+      await input.fill(`Responsive Test ${name}`);
+      await addButton.click();
+
+      // [AC3] Core Flow: List and interact with TodoItemRow
+      const todoRow = page.getByTestId("todo-item-row").first();
+      await expect(todoRow).toBeVisible();
+
+      const checkbox = todoRow.getByTestId("todo-checkbox");
+      const deleteButton = todoRow.getByTestId("todo-delete-button");
+
+      await expect(checkbox).toBeVisible();
+      await expect(deleteButton).toBeVisible();
+
+      // Toggle completion
+      await checkbox.click();
+      // Delete
+      await deleteButton.click();
     });
   }
 });

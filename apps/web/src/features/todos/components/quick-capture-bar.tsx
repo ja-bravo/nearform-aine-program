@@ -98,6 +98,7 @@ export function QuickCaptureBar() {
           id="quick-capture-description"
           type="text"
           autoComplete="off"
+          data-testid="quick-capture-input"
           placeholder="What needs doing?"
           className="h-12 w-full rounded-lg border border-zinc-300 bg-white px-4 text-sm text-zinc-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50 dark:focus-visible:ring-zinc-400"
           aria-invalid={errors.description || !!lastError ? "true" : "false"}
@@ -125,7 +126,10 @@ export function QuickCaptureBar() {
           </p>
         )}
         <div className="mt-1 flex items-center gap-2">
-          <PersistenceStatusBadge status={persistenceStatus} />
+          <PersistenceStatusBadge
+            status={persistenceStatus}
+            data-testid="persistence-status-badge"
+          />
           {lastError && (
             <div className="flex items-center gap-2" role="alert">
               <p
@@ -149,6 +153,7 @@ export function QuickCaptureBar() {
       <div className="flex shrink-0">
         <button
           type="submit"
+          data-testid="quick-capture-submit"
           disabled={mutation.isPending || isReadOnly}
           className="h-12 w-full rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:focus-visible:ring-zinc-100 sm:w-auto"
         >

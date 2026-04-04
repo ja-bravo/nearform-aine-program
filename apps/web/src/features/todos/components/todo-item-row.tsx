@@ -126,6 +126,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
         <input
           type="checkbox"
           checked={todo.isCompleted}
+          data-testid="todo-checkbox"
           disabled={isInteractionDisabled}
           onChange={handleToggle}
           className="h-6 w-6 shrink-0 cursor-pointer rounded border-zinc-300 text-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-600 dark:focus-visible:ring-zinc-400"
@@ -210,6 +211,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
       </div>
       <button
         type="button"
+        data-testid="todo-delete-button"
         disabled={isInteractionDisabled}
         onClick={() => {
           deleteMutation.reset();
