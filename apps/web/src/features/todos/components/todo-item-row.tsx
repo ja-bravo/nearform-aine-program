@@ -8,6 +8,7 @@ import { useDeleteTodoMutation } from "@/features/todos/hooks/use-delete-todo-mu
 import { usePersistenceStatus } from "@/features/todos/hooks/use-persistence-status";
 import { useConnectivity } from "@/shared/hooks/use-connectivity";
 import { PersistenceStatusBadge } from "./persistence-status-badge";
+import { announce } from "@/shared/ui/a11y-announcer";
 
 const createdAtFormatter = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
@@ -54,26 +55,40 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
     isPending,
   });
 
-  const handleRetryToggle = () => {
+  const handleToggle = () => {
+    if (isInteractionDisabled) return;
+    completeMutation.reset();
     completeMutation.mutate(
       {
         id: todo.id,
         isCompleted: !todo.isCompleted,
       },
       {
-        onSuccess: () => setLastCompleteError(null),
-        onError: (error) =>
-          setLastCompleteError(
-            error instanceof ApiError ? error.message : ERROR_UPDATE_FALLBACK
-          ),
+        onSuccess: () => {
+          setLastCompleteError(null);
+          announce(
+            `Task '${todo.description}' marked as ${!todo.isCompleted ? "complete" : "active"}`
+          );
+        },
+        onError: (error) => {
+          const msg =
+            error instanceof ApiError ? error.message : ERROR_UPDATE_FALLBACK;
+          setLastCompleteError(msg);
+          announce(`Update failed: ${msg}`);
+        },
       }
     );
+  };
+
+  const handleRetryToggle = () => {
+    handleToggle();
   };
 
   const handleRetryDelete = () => {
     deleteMutation.mutate(todo.id, {
       onSuccess: () => {
         setLastDeleteError(null);
+        announce(`Task '${todo.description}' deleted`);
         // AC5: Focus the next or previous item's checkbox after deletion
         const nextItem =
           liRef.current?.nextElementSibling ||
@@ -86,10 +101,12 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
           target.focus();
         }
       },
-      onError: (error) =>
-        setLastDeleteError(
-          error instanceof ApiError ? error.message : ERROR_DELETE_FALLBACK
-        ),
+      onError: (error) => {
+        const msg =
+          error instanceof ApiError ? error.message : ERROR_DELETE_FALLBACK;
+        setLastDeleteError(msg);
+        announce(`Delete failed: ${msg}`);
+      },
     });
   };
 
@@ -109,26 +126,13 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
           type="checkbox"
           checked={todo.isCompleted}
           disabled={isInteractionDisabled}
-          onChange={() => {
-            completeMutation.reset();
-            completeMutation.mutate(
-              {
-                id: todo.id,
-                isCompleted: !todo.isCompleted,
-              },
-              {
-                onSuccess: () => setLastCompleteError(null),
-                onError: (error) =>
-                  setLastCompleteError(
-                    error instanceof ApiError
-                      ? error.message
-                      : ERROR_UPDATE_FALLBACK
-                  ),
-              }
-            );
-          }}
+          onChange={handleToggle}
           className="h-6 w-6 shrink-0 cursor-pointer rounded border-zinc-300 text-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-600 dark:focus-visible:ring-zinc-400"
-          aria-label={`Mark '${todo.description || "task"}' as ${todo.isCompleted ? "active" : "complete"}`}
+          aria-label={
+            todo.isCompleted
+              ? `Mark task active: ${todo.description}`
+              : `Complete task: ${todo.description}`
+          }
           aria-describedby={lastCompleteError ? completeErrorId : undefined}
         />
       </div>
@@ -136,7 +140,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
         <p
           className={`break-all text-sm font-medium ${
             todo.isCompleted
-              ? "text-zinc-400 line-through dark:text-zinc-500"
+              ? "text-zinc-500 line-through dark:text-zinc-500"
               : "text-zinc-900 dark:text-zinc-50"
           }`}
         >
@@ -211,6 +215,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
           deleteMutation.mutate(todo.id, {
             onSuccess: () => {
               setLastDeleteError(null);
+              announce(`Task '${todo.description}' deleted`);
               // AC5: Focus the next or previous item's checkbox after deletion
               const nextItem =
                 liRef.current?.nextElementSibling ||
@@ -223,12 +228,14 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
                 target.focus();
               }
             },
-            onError: (error) =>
-              setLastDeleteError(
+            onError: (error) => {
+              const msg =
                 error instanceof ApiError
                   ? error.message
-                  : ERROR_DELETE_FALLBACK
-              ),
+                  : ERROR_DELETE_FALLBACK;
+              setLastDeleteError(msg);
+              announce(`Delete failed: ${msg}`);
+            },
           });
         }}
         aria-label={`Delete '${todo.description || "task"}'`}

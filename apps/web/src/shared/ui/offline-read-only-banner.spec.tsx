@@ -34,5 +34,7 @@ describe("OfflineReadOnlyBanner", () => {
     // Verify it has warning background and text color
     expect(banner).toHaveClass("bg-[#D97706]");
     expect(banner).toHaveClass("text-white");
+    // Verify icon is present
+    expect(banner.querySelector("svg")).toBeInTheDocument();
   });
 });

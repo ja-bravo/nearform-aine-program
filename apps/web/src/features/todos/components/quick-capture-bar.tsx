@@ -12,6 +12,7 @@ import { usePersistenceStatus } from "@/features/todos/hooks/use-persistence-sta
 import { useConnectivity } from "@/shared/hooks/use-connectivity";
 import { ApiError } from "@/shared/api/api-error";
 import { PersistenceStatusBadge } from "./persistence-status-badge";
+import { announce } from "@/shared/ui/a11y-announcer";
 
 const ERROR_MESSAGE_FALLBACK = "Could not save your task. Try again.";
 
@@ -41,6 +42,7 @@ export function QuickCaptureBar() {
   const handleSuccess = () => {
     setLastError(null);
     reset({ description: "" });
+    announce("Task added");
     // AC5: Return focus to support rapid-fire entry, but only if not in read-only mode
     if (!isReadOnly) {
       setFocus("description");
@@ -48,7 +50,7 @@ export function QuickCaptureBar() {
   };
 
   const onSubmit = handleSubmit(async (values) => {
-    if (isReadOnly) return;
+    if (isReadOnly || mutation.isPending) return;
     try {
       mutation.reset();
       await mutation.mutateAsync({
@@ -56,9 +58,10 @@ export function QuickCaptureBar() {
       });
       handleSuccess();
     } catch (error) {
-      setLastError(
-        error instanceof ApiError ? error.message : ERROR_MESSAGE_FALLBACK
-      );
+      const msg =
+        error instanceof ApiError ? error.message : ERROR_MESSAGE_FALLBACK;
+      setLastError(msg);
+      announce(`Save failed: ${msg}`);
     }
   });
 
@@ -69,9 +72,10 @@ export function QuickCaptureBar() {
       });
       handleSuccess();
     } catch (error) {
-      setLastError(
-        error instanceof ApiError ? error.message : ERROR_MESSAGE_FALLBACK
-      );
+      const msg =
+        error instanceof ApiError ? error.message : ERROR_MESSAGE_FALLBACK;
+      setLastError(msg);
+      announce(`Save failed: ${msg}`);
     }
   };
 

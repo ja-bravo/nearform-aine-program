@@ -13,3 +13,7 @@
 
 ## Deferred from: code review of 4-2-deliver-keyboard-only-core-flow.md (2026-04-03)
 - [Review][Defer] Inefficient per-row refs for focus management [todo-item-row.tsx:40] — Adding a `useRef` to every single `TodoItemRow` in a potentially massive list just to handle a focus jump on delete is inefficient. This logic belongs in a parent container that manages the list's focus state.
+
+## Deferred from: code review of 4-3-ensure-semantic-accessibility-and-non-color-status-cues.md (2026-04-04)
+- Verbose announcements: Including full `todo.description` in every toggle/delete announcement might be too much for power users.
+- Property mismatch in docs vs code: Spec uses `todo.text` but code uses `todo.description`.

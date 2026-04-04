@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { A11yAnnouncer } from "@/shared/ui/a11y-announcer";
 import { OfflineReadOnlyBanner } from "@/shared/ui/offline-read-only-banner";
 import { QueryProvider } from "./query-provider";
 
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">
         <QueryProvider>
+          <A11yAnnouncer />
           <OfflineReadOnlyBanner />
           {children}
         </QueryProvider>

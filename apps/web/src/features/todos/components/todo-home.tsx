@@ -5,6 +5,7 @@ import { TodoList } from "@/features/todos/components/todo-list";
 import { useTodosQuery } from "@/features/todos/hooks/use-todos-query";
 import { ApiError } from "@/shared/api/api-error";
 import { getApiBaseUrl } from "@/shared/api/env";
+import { A11yAnnouncer } from "@/shared/ui/a11y-announcer";
 
 export function TodoHome() {
   const base = getApiBaseUrl();

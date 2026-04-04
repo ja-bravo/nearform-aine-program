@@ -20,6 +20,9 @@ describe("PersistenceStatusBadge", () => {
     expect(badge.parentElement?.className).toContain("opacity-100");
     expect(badge.className).toContain("text-blue-600");
     expect(badge.className).toContain("bg-blue-50");
+    // Verify icon is rendered
+    expect(badge.querySelector("svg")).toBeInTheDocument();
+    expect(badge.querySelector("svg")).toHaveClass("animate-spin");
   });
 
   it("renders 'Saved' in green when status is 'saved'", () => {
@@ -28,6 +31,8 @@ describe("PersistenceStatusBadge", () => {
     expect(badge).toBeInTheDocument();
     expect(badge.className).toContain("text-green-600");
     expect(badge.className).toContain("bg-green-50");
+    // Verify icon is rendered
+    expect(badge.querySelector("svg")).toBeInTheDocument();
   });
 
   it("renders 'Not saved' in red when status is 'error'", () => {
@@ -36,6 +41,8 @@ describe("PersistenceStatusBadge", () => {
     expect(badge).toBeInTheDocument();
     expect(badge.className).toContain("text-red-600");
     expect(badge.className).toContain("bg-red-50");
+    // Verify icon is rendered
+    expect(badge.querySelector("svg")).toBeInTheDocument();
   });
 
   it("has aria-live='polite' and role='status' on the container", () => {
