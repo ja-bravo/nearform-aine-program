@@ -486,3 +486,26 @@ So that I can trust the build and deployment process.
 **And** any remaining "any" types or implicit any errors in tests are resolved  
 **And** the CI configuration is verified for accuracy.
 
+### Story 5.5: Configure Performance Budgets and CI Quality Gates
+
+As a maintainer,  
+I want automated performance budget checks in CI for both web and API,  
+So that we catch performance regressions early and stay compliant with NFR1 and NFR2.
+
+**Acceptance Criteria:**
+- `perf/budgets/web-budgets.json` and `perf/budgets/api-budgets.json` are created with thresholds mapped from NFR-P1 and NFR-P2.
+- CI pipeline includes a job to validate Lighthouse (LCP/TBT), axe-core (accessibility score), and k6 (latency/throughput) results against these budgets.
+- Any budget violation blocks the Pull Request merge until remediated or explicitly waived with rationale.
+- Test coverage is above 70%
+
+### Story 5.6: Fix CI Playwright installation and timeout issues
+
+As a developer,  
+I want the CI E2E tests to run reliably with correct tool setup,  
+So that I can verify my changes without false negatives from infrastructure issues.
+
+**Acceptance Criteria:**
+- Playwright browser installation in CI is corrected to use the proper workspace filter or location.
+- E2E test timeouts in CI are adjusted to prevent premature failures (e.g., the 1s timeout reported).
+- CI `test-e2e` job completes successfully when tests are passing.
+

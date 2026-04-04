@@ -1,0 +1,12 @@
+{
+  "http_req_duration": {
+    "p95": 500
+  },
+  "initial_load_p95": 2000,
+  "throughput": {
+    "requests_per_second": 100
+  },
+  "error_rate": {
+    "max": 0.01
+  }
+}

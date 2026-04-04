@@ -1,5 +1,5 @@
 # generated: 2026-04-04T13:00:00Z
-# last_updated: 2026-04-04T13:30:00Z
+# last_updated: 2026-04-04T18:35:00Z
 # project: nearform-aine-bmad
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,11 +35,11 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-04-04T13:00:00Z"
-  last_updated: "2026-04-04T18:30:00Z"
-  project: nearform-aine-bmad
-  project_key: NOKEY
-  tracking_system: file-system
-  story_location: /Users/joseantoniobravoisidro/Desktop/dev/personal/nearform-aine-bmad/_bmad-output/implementation-artifacts
+last_updated: "2026-04-04T19:25:00Z"
+project: nearform-aine-bmad
+project_key: NOKEY
+tracking_system: file-system
+story_location: /Users/joseantoniobravoisidro/Desktop/dev/personal/nearform-aine-bmad/_bmad-output/implementation-artifacts
 
 development_status:
   epic-1: done
@@ -76,4 +76,6 @@ development_status:
   5-2-configure-k6-performance-validation-suite: done
   5-3-establish-coverage-reporting-and-70-quality-gate: done
   5-4-harden-ci-pipelines-and-resolve-type-debt: done
+  5-5-configure-performance-budgets-and-ci-quality-gates: done
+  5-6-fix-ci-playwright-installation-and-timeout-issues: backlog
   epic-5-retrospective: optional

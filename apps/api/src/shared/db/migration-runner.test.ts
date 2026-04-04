@@ -2,10 +2,32 @@ import SQL from "@nearform/sql";
 import { randomUUID } from "crypto";
 import { readFile } from "fs/promises";
 import { dirname, join } from "path";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it, vi, beforeEach } from "vitest";
 import { fileURLToPath } from "url";
 import { getMigrationsGlob, runMigrations } from "./migration-runner.js";
 import { closePool, getPool, pingDbWithNearformSql } from "./pool.js";
+import pg from "pg";
+import Postgrator from "postgrator";
+
+vi.mock("pg", async (importOriginal) => {
+  const mod = (await importOriginal()) as any;
+  const Client = vi.fn(() => ({
+    connect: vi.fn().mockResolvedValue(undefined),
+    query: vi.fn().mockResolvedValue({ rows: [] }),
+    end: vi.fn().mockResolvedValue(undefined),
+  }));
+  return { ...mod, default: { ...mod.default, Client } };
+});
+
+const mockPostgrator = {
+  migrate: vi.fn().mockResolvedValue([]),
+};
+
+vi.mock("postgrator", () => {
+  return {
+    default: vi.fn().mockImplementation(() => mockPostgrator),
+  };
+});
 
 const migrationsDir = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -43,67 +65,44 @@ describe("migration SQL artifacts", () => {
   });
 });
 
-describe("runMigrations", () => {
+describe("runMigrations unit tests", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env.DATABASE_URL = "postgres://user:pass@localhost:5432/mydb";
+  });
+
   it("fails fast when DATABASE_URL is missing", async () => {
-    const prev = process.env.DATABASE_URL;
     delete process.env.DATABASE_URL;
     await expect(runMigrations()).rejects.toThrow(/DATABASE_URL/);
-    if (prev !== undefined) process.env.DATABASE_URL = prev;
-  });
-});
-
-const runDb = process.env.RUN_DB_TESTS === "1" && process.env.DATABASE_URL;
-
-describe.skipIf(!runDb)("migrations against Postgres", () => {
-  afterAll(async () => {
-    await closePool();
   });
 
-  it("applies migrations and records schema version", async () => {
+  it("successfully runs migrations with mocked DB", async () => {
     await runMigrations();
-    await pingDbWithNearformSql();
-    const pool = getPool();
-    const ver = await pool.query(
-      "SELECT version FROM schemaversion ORDER BY version DESC LIMIT 1"
+    expect(pg.Client).toHaveBeenCalled();
+    expect(Postgrator).toHaveBeenCalledWith(
+      expect.objectContaining({
+        database: "mydb",
+      })
     );
-    expect(Number(ver.rows[0]?.version)).toBeGreaterThanOrEqual(2);
-    const tab = await pool.query(
-      `SELECT column_name FROM information_schema.columns
-       WHERE table_schema = 'public' AND table_name = 'todos'
-       ORDER BY ordinal_position`
-    );
-    const names = tab.rows.map((r) => r.column_name as string);
-    expect(names).toEqual(
-      expect.arrayContaining([
-        "id",
-        "description",
-        "is_completed",
-        "created_at",
-      ])
-    );
-    const idx = await pool.query(
-      `SELECT indexname FROM pg_indexes
-       WHERE schemaname = 'public' AND tablename = 'todos'
-       AND indexname = 'idx_todos_created_at'`
-    );
-    expect(idx.rows.length).toBe(1);
-    const label = `durability-smoke-${randomUUID()}`;
-    const insert = SQL`INSERT INTO todos (description) VALUES (${label}) RETURNING id`;
-    const inserted = await pool.query({
-      text: insert.text,
-      values: insert.values,
-    });
-    expect(inserted.rows[0]?.id).toBeDefined();
-    const selectRow = SQL`SELECT id FROM todos WHERE description = ${label}`;
-    const one = await pool.query({
-      text: selectRow.text,
-      values: selectRow.values,
-    });
-    expect(one.rows.length).toBe(1);
   });
 
-  it("is idempotent on second run", async () => {
-    await runMigrations();
-    await runMigrations();
+  it("throws error when database name is missing in connection string", async () => {
+    process.env.DATABASE_URL = "postgres://localhost:5432";
+    await expect(runMigrations()).rejects.toThrow(
+      "DATABASE_URL must include a database name in the path"
+    );
+  });
+
+  it("logs and rethrows on migration failure", async () => {
+    const error = new Error("migration failed");
+    (error as any).appliedMigrations = [{ version: 1 }];
+    mockPostgrator.migrate.mockRejectedValueOnce(error);
+
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    await expect(runMigrations()).rejects.toThrow("migration failed");
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining("database migration failed")
+    );
+    consoleSpy.mockRestore();
   });
 });

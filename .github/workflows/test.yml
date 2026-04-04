@@ -142,7 +142,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-playwright-
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --filter web exec playwright install --with-deps chromium
       - name: Run E2E tests
         run: pnpm turbo run test:e2e -- --shard=${{ matrix.shard || 1 }}/4
         env:
@@ -197,7 +197,7 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --filter web exec playwright install --with-deps chromium
       - name: Detect changed E2E specs
         id: changed-specs
         run: |
@@ -238,10 +238,117 @@ jobs:
             apps/web/playwright-report/
           retention-days: 7
 
+  quality-gate:
+    name: Performance & Accessibility Gate
+    runs-on: ubuntu-latest
+    needs: build
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: todo
+          POSTGRES_PASSWORD: todo
+          POSTGRES_DB: todo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Start API
+        run: pnpm --filter api start > api.log 2>&1 &
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+      - name: Start Web
+        run: pnpm --filter web start > web.log 2>&1 &
+        env:
+          NEXT_PUBLIC_API_BASE_URL: ${{ env.NEXT_PUBLIC_API_BASE_URL }}
+      - name: Wait for services
+        run: |
+          npx wait-on --timeout 60000 http://localhost:3001/healthz/ready http://localhost:3000/ || {
+            echo "❌ Services failed to start within 60s"
+            echo "--- API Logs ---"
+            cat api.log
+            echo "--- Web Logs ---"
+            cat web.log
+            exit 1
+          }
+      - name: Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./apps/web/.lighthouserc.js
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+      - name: Run k6 Load Tests
+        uses: grafana/k6-action@v0.5.0
+        with:
+          filename: perf/k6/api-read-scenarios.js
+          flags: --summary-export=k6-summary.json
+        env:
+          K6_API_BASE_URL: http://localhost:3001
+      - name: Check k6 budgets
+        run: |
+          if [[ ! -f k6-summary.json ]]; then
+            echo "❌ k6 summary file missing!"
+            exit 1
+          fi
+          
+          # CRUD p95 check
+          P95=$(jq '.metrics.http_req_duration.values."p(95)"' k6-summary.json)
+          THRESHOLD=$(jq '.http_req_duration.p95' perf/budgets/api-budgets.json)
+          
+          # Initial load p95 check
+          LOAD_P95=$(jq '.metrics.initial_load_duration.values."p(95)"' k6-summary.json)
+          LOAD_THRESHOLD=$(jq '.initial_load_p95' perf/budgets/api-budgets.json)
+          
+          echo "k6 CRUD p95: $P95 ms (threshold: $THRESHOLD ms)"
+          echo "k6 Initial Load p95: $LOAD_P95 ms (threshold: $LOAD_THRESHOLD ms)"
+          
+          if [[ ! "$P95" =~ ^[0-9.]+$ ]] || [[ ! "$THRESHOLD" =~ ^[0-9.]+$ ]]; then
+            echo "❌ Invalid CRUD performance data"
+            exit 1
+          fi
+          
+          if (( $(echo "$P95 > $THRESHOLD" | bc -l) )); then
+            echo "❌ API CRUD performance budget exceeded!"
+            exit 1
+          fi
+          
+          if [[ "$LOAD_P95" != "null" && "$LOAD_THRESHOLD" != "null" ]]; then
+            if (( $(echo "$LOAD_P95 > $LOAD_THRESHOLD" | bc -l) )); then
+              echo "❌ API Initial Load performance budget exceeded!"
+              exit 1
+            fi
+          fi
+          
+          echo "✅ API performance within budget"
+      - name: Upload performance artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-reports
+          path: |
+            k6-summary.json
+            api.log
+            web.log
+          retention-days: 14
+
   report:
     name: Final Summary
     runs-on: ubuntu-latest
-    needs: [test-unit, test-e2e, burn-in]
+    needs: [test-unit, test-e2e, burn-in, quality-gate]
     if: always()
     steps:
       - name: Summary
@@ -253,6 +360,7 @@ jobs:
           echo "| Unit & Integration | ${{ needs.test-unit.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| E2E (Sharded) | ${{ needs.test-e2e.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Burn-in (Flaky Detection) | ${{ needs.burn-in.result || 'Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Performance & Accessibility | ${{ needs.quality-gate.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           if [ "${{ needs.test-e2e.result }}" == "failure" ] || [ "${{ needs.burn-in.result }}" == "failure" ]; then
