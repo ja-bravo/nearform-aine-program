@@ -18,20 +18,25 @@ export function usePersistenceStatus({
   timeoutMs = 3000,
 }: UsePersistenceStatusProps) {
   const [showSaved, setShowSaved] = useState(false);
+  const [prevIsSuccess, setPrevIsSuccess] = useState(false);
 
-  useEffect(() => {
-    let hideTimer: ReturnType<typeof setTimeout>;
-
+  if (isSuccess !== prevIsSuccess) {
+    setPrevIsSuccess(isSuccess);
     if (isSuccess) {
       setShowSaved(true);
-      hideTimer = setTimeout(() => setShowSaved(false), timeoutMs ?? 3000);
-    } else if (isPending) {
-      setShowSaved(false);
     }
-    return () => {
-      if (hideTimer) clearTimeout(hideTimer);
-    };
-  }, [isSuccess, isPending, timeoutMs]);
+  }
+
+  if (isPending && showSaved) {
+    setShowSaved(false);
+  }
+
+  useEffect(() => {
+    if (showSaved) {
+      const timer = setTimeout(() => setShowSaved(false), timeoutMs);
+      return () => clearTimeout(timer);
+    }
+  }, [showSaved, timeoutMs]);
 
   let status: PersistenceStatus = null;
   if (isPending) {
