@@ -6,6 +6,7 @@ export type PersistenceStatus = "saving" | "saved" | "error" | null;
 
 interface PersistenceStatusBadgeProps {
   status: PersistenceStatus;
+  "data-testid"?: string;
 }
 
 const config = {
@@ -55,7 +56,7 @@ const config = {
       </svg>
     ),
     className:
-      "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+      "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400",
   },
   error: {
     text: "Not saved",
@@ -82,11 +83,28 @@ const config = {
 
 export const PersistenceStatusBadge: FC<PersistenceStatusBadgeProps> = ({
   status,
+  "data-testid": dataTestId,
 }) => {
   const currentStatus = status && config[status];
+  const [shouldRender, setShouldRender] = useState(!!status);
+
+  useEffect(() => {
+    if (status) {
+      setShouldRender(true);
+    } else {
+      const timer = setTimeout(() => setShouldRender(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
+
+  if (!shouldRender && !status)
+    return <div className="h-5" data-testid={dataTestId} />;
 
   return (
     <div
+      data-testid={dataTestId}
+      role="status"
+      aria-live="polite"
       className={`h-5 transition-all duration-300 ${
         status ? "scale-100 opacity-100" : "scale-95 opacity-0"
       }`}

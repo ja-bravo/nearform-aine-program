@@ -135,7 +135,7 @@ describe("Keyboard Navigation and Focus Management", () => {
 
       await waitFor(() => {
         const secondCheckbox = screen.getByRole("checkbox", {
-          name: /mark 'clean kitchen' as complete/i,
+          name: /complete task: clean kitchen/i,
         });
         expect(secondCheckbox).toHaveFocus();
       });

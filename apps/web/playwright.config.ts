@@ -49,10 +49,20 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: "pnpm dev",
-    url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
+  webServer: [
+    {
+      command: process.env.CI
+        ? "pnpm -C ../api start"
+        : "pnpm --filter api dev",
+      url: "http://localhost:3001/healthz/live",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+    },
+    {
+      command: process.env.CI ? "pnpm start" : "pnpm dev",
+      url: "http://localhost:3000/healthz",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+    },
+  ],
 });

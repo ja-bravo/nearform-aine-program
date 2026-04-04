@@ -39,6 +39,8 @@ FR17: User works in a single implicit workspace with no sign-in or account manag
 FR18: After a successful change, what the user sees reflects the persisted todo set (no unexplained mismatch).  
 FR19: User can complete core todo actions using only the keyboard.  
 FR20: Core interactive elements expose an accessible name and role to assistive technologies.
+FR21: System must include at least 5 Playwright E2E tests covering core journeys (create, list, complete, delete, recovery).
+FR22: System must include k6 performance tests that validate NFR1 and NFR2 (latency and load targets).
 
 ### NonFunctional Requirements
 
@@ -52,6 +54,7 @@ NFR7: After API acknowledges a successful write, a normal API process restart do
 NFR8: System documents backup/recovery expectations suitable for MVP production deployments.  
 NFR9: Core flows (add, list, complete/incomplete, delete) conform to WCAG 2.2 Level AA for shipped custom interactions, with known gaps documented and remediated.  
 NFR10: Focus order and visible focus indicators support keyboard-only completion of core flows without traps.
+NFR11: Codebase must maintain at least 70% total test coverage (unit and integration).
 
 ### Additional Requirements
 
@@ -114,6 +117,8 @@ FR17: Epic 1 - Single implicit workspace (no auth)
 FR18: Epic 1/2/3 - UI must reflect persisted truth
 FR19: Epic 4 - Keyboard-only completion of core flows
 FR20: Epic 4 - Accessible names/roles
+FR21: Epic 5 - Automated E2E verification (Playwright)
+FR22: Epic 5 - Automated performance verification (k6)
 
 ## Epic List
 
@@ -132,6 +137,10 @@ Users can understand loading/error/offline states and recover from failed operat
 ### Epic 4: Deliver Cross-Device Accessible Experience
 Users can perform the full core flow on mobile and desktop with keyboard support and accessible semantics.
 **FRs covered:** FR14, FR15, FR19, FR20, FR7
+
+### Epic 5: Quality and Performance Assurance
+Establish a robust quality gate by implementing comprehensive E2E tests and performance scenarios that validate functional correctness and NFR compliance.
+**FRs covered:** FR21, FR22
 
 ## Epic 1: Launch the Trusted Todo Foundation
 
@@ -403,3 +412,60 @@ So that regressions are caught before release.
 **Then** core journeys pass defined quality gates for viewport behavior and a11y baselines  
 **And** any known gaps are documented with remediation targets before release.
 **And** failing quality gates block release promotion until issues are fixed or explicitly waived with rationale.
+
+## Epic 5: Quality and Performance Assurance
+
+Establish a robust quality gate by implementing comprehensive E2E tests and performance scenarios that validate functional correctness and NFR compliance.
+
+### Story 5.1: Implement Core Journey E2E Test Suite
+
+As a developer,
+I want automated Playwright tests covering the full todo lifecycle (create, list, complete, delete, recovery),
+So that I can prevent functional regressions across all supported viewports.
+
+**FRs implemented:** FR21
+
+**Acceptance Criteria:**
+
+**Given** a running local environment (Web, API, DB)
+**When** I run the Playwright test suite
+**Then** at least 5 distinct test scenarios pass covering:
+  1. Quick capture and list visibility.
+  2. Toggle completion and visual state change.
+  3. Item deletion and list reconciliation.
+  4. Inline retry after simulated API failure.
+  5. Layout responsiveness (mobile vs desktop).
+**And** tests run successfully in the CI pipeline quality gate.
+
+### Story 5.2: Configure k6 Performance Validation Suite
+
+As an operator,
+I want automated k6 load tests that measure API latency and throughput,
+So that I can verify compliance with NFR1 and NFR2 performance targets.
+
+**FRs implemented:** FR22
+**NFRs implemented:** NFR1, NFR2
+
+**Acceptance Criteria:**
+
+**Given** a production-like or local test environment
+**When** I execute the k6 load scenarios (Read/Write)
+**Then** the p95 latency for CRUD operations remains under 500ms (NFR1).
+**And** initial load of 500 items completes within 2s at p95 (NFR2).
+**And** the test results are exported as a structured report for baseline comparison.
+
+### Story 5.3: Establish Coverage Reporting and 70% Quality Gate
+
+As a maintainer,
+I want centralized coverage reporting for Vitest unit/integration tests,
+So that I can enforce a 70% coverage floor and identify untested logic.
+
+**NFRs implemented:** NFR11
+
+**Acceptance Criteria:**
+
+**Given** the monorepo test runners
+**When** I run `pnpm test:coverage`
+**Then** a combined coverage report is generated for `apps/web` and `apps/api`.
+**And** the build fails if total line/branch coverage falls below 70% (NFR11).
+**And** the report is accessible as a CI artifact for developer review.

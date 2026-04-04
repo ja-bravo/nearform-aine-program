@@ -66,7 +66,7 @@ describe("TodoItemRow", () => {
     );
     renderWithClient(<TodoItemRow todo={activeTodo} />);
     await user.click(
-      screen.getByRole("checkbox", { name: /mark 'buy milk' as complete/i })
+      screen.getByRole("checkbox", { name: /complete task: buy milk/i })
     );
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const call = fetchMock.mock.calls[0];
@@ -96,7 +96,7 @@ describe("TodoItemRow", () => {
     );
     renderWithClient(<TodoItemRow todo={completedTodo} />);
     await user.click(
-      screen.getByRole("checkbox", { name: /mark 'buy milk' as active/i })
+      screen.getByRole("checkbox", { name: /mark task active: buy milk/i })
     );
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const call = fetchMock.mock.calls[0];
@@ -114,11 +114,11 @@ describe("TodoItemRow", () => {
     fetchMock.mockImplementationOnce(() => new Promise(() => {}));
     renderWithClient(<TodoItemRow todo={activeTodo} />);
     await user.click(
-      screen.getByRole("checkbox", { name: /mark 'buy milk' as complete/i })
+      screen.getByRole("checkbox", { name: /complete task: buy milk/i })
     );
     await waitFor(() => {
       expect(
-        screen.getByRole("checkbox", { name: /mark 'buy milk' as complete/i })
+        screen.getByRole("checkbox", { name: /complete task: buy milk/i })
       ).toBeDisabled();
       expect(
         screen.getByRole("button", { name: /delete 'buy milk'/i })
@@ -143,7 +143,7 @@ describe("TodoItemRow", () => {
     );
     renderWithClient(<TodoItemRow todo={activeTodo} />);
     await user.click(
-      screen.getByRole("checkbox", { name: /mark 'buy milk' as complete/i })
+      screen.getByRole("checkbox", { name: /complete task: buy milk/i })
     );
     expect(await screen.findByRole("alert")).toBeInTheDocument();
     expect(screen.getByText("Buy milk")).toBeInTheDocument();
@@ -174,7 +174,7 @@ describe("TodoItemRow", () => {
     );
     await waitFor(() => {
       expect(
-        screen.getByRole("checkbox", { name: /mark 'buy milk' as complete/i })
+        screen.getByRole("checkbox", { name: /complete task: buy milk/i })
       ).toBeDisabled();
       expect(
         screen.getByRole("button", { name: /delete 'buy milk'/i })
@@ -223,7 +223,7 @@ describe("TodoItemRow", () => {
     const emptyTodo = { ...activeTodo, description: "" };
     renderWithClient(<TodoItemRow todo={emptyTodo} />);
     expect(
-      screen.getByRole("checkbox", { name: /mark 'task' as complete/i })
+      screen.getByRole("checkbox", { name: /complete task: task/i })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /delete 'task'/i })

@@ -59,7 +59,7 @@ describe("Inline Retry Behavior", () => {
 
       // Trigger initial failure
       await user.click(
-        screen.getByRole("checkbox", { name: /mark 'buy milk' as complete/i })
+        screen.getByRole("checkbox", { name: /complete task: buy milk/i })
       );
 
       const retryButton = await screen.findByRole("button", { name: /retry/i });
@@ -93,7 +93,7 @@ describe("Inline Retry Behavior", () => {
 
       renderWithClient(<TodoItemRow todo={activeTodo} />);
       await user.click(
-        screen.getByRole("checkbox", { name: /mark 'buy milk' as complete/i })
+        screen.getByRole("checkbox", { name: /complete task: buy milk/i })
       );
 
       const retryButton = await screen.findByRole("button", { name: /retry/i });

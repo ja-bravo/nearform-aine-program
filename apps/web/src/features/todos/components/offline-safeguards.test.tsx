@@ -80,7 +80,7 @@ describe("Offline Safeguards", () => {
       renderWithClient(<TodoItemRow todo={activeTodo} />);
 
       const checkbox = screen.getByRole("checkbox", {
-        name: /mark 'buy milk' as complete/i,
+        name: /complete task: buy milk/i,
       });
       const deleteButton = screen.getByRole("button", { name: /delete/i });
 
@@ -95,7 +95,7 @@ describe("Offline Safeguards", () => {
       renderWithClient(<TodoItemRow todo={activeTodo} />);
 
       const checkbox = screen.getByRole("checkbox", {
-        name: /mark 'buy milk' as complete/i,
+        name: /complete task: buy milk/i,
       });
       const deleteButton = screen.getByRole("button", { name: /delete/i });
 

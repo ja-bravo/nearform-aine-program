@@ -132,8 +132,8 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
           className="h-6 w-6 shrink-0 cursor-pointer rounded border-zinc-300 text-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-600 dark:focus-visible:ring-zinc-400"
           aria-label={
             todo.isCompleted
-              ? `Mark task active: ${todo.description}`
-              : `Complete task: ${todo.description}`
+              ? `Mark task active: ${todo.description || "unnamed task"}`
+              : `Complete task: ${todo.description || "unnamed task"}`
           }
           aria-describedby={lastCompleteError ? completeErrorId : undefined}
         />

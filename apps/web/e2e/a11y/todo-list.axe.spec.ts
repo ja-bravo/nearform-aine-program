@@ -28,7 +28,7 @@ test.describe("Accessibility Quality Gate @a11y", () => {
     await expect(page.locator("main")).toBeVisible();
 
     // Verify PersistenceStatusBadge is scanned (implicitly part of the page)
-    await expect(page.getByTestId("persistence-status-badge")).toBeVisible();
+    await expect(page.getByTestId("persistence-status-badge")).toBeAttached();
 
     await checkA11y(page, "Home Page");
   });

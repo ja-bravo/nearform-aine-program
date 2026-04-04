@@ -1,9 +1,11 @@
 import { test, expect } from "@playwright/test";
 
 const breakpoints = [
+  { name: "mobile", width: 375, height: 667 },
   { name: "sm", width: 640, height: 800 },
   { name: "md", width: 768, height: 800 },
   { name: "lg", width: 1024, height: 800 },
+  { name: "desktop", width: 1280, height: 800 },
 ];
 
 test.describe("Responsive Viewport Quality Gate @responsive", () => {

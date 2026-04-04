@@ -69,7 +69,7 @@ describe("Persistence Lifecycle", () => {
 
     // Click toggle
     fireEvent.click(
-      screen.getByRole("checkbox", { name: /mark 'test task' as complete/i })
+      screen.getByRole("checkbox", { name: /complete task: test task/i })
     );
 
     // Let the mutation resolve and the useEffect run
@@ -103,7 +103,7 @@ describe("Persistence Lifecycle", () => {
 
     renderWithClient(<TodoItemRow todo={activeTodo} />);
     fireEvent.click(
-      screen.getByRole("checkbox", { name: /mark 'test task' as complete/i })
+      screen.getByRole("checkbox", { name: /complete task: test task/i })
     );
 
     expect(await screen.findByText("Not saved")).toBeInTheDocument();
