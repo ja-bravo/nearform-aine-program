@@ -1,6 +1,6 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 
 export type PersistenceStatus = "saving" | "saved" | "error" | null;
 
@@ -89,12 +89,13 @@ export const PersistenceStatusBadge: FC<PersistenceStatusBadgeProps> = ({
   const [shouldRender, setShouldRender] = useState(!!status);
 
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
     if (status) {
-      setShouldRender(true);
+      timer = setTimeout(() => setShouldRender(true), 0);
     } else {
-      const timer = setTimeout(() => setShouldRender(false), 300);
-      return () => clearTimeout(timer);
+      timer = setTimeout(() => setShouldRender(false), 300);
     }
+    return () => clearTimeout(timer);
   }, [status]);
 
   if (!shouldRender && !status)
