@@ -1,7 +1,7 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const checkA11y = async (page, name) => {
+const checkA11y = async (page: Page, name: string) => {
   const accessibilityScanResults = await new AxeBuilder({ page })
     .withTags(["wcag2aa", "wcag22aa"])
     .analyze();

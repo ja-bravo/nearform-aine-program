@@ -469,3 +469,20 @@ So that I can enforce a 70% coverage floor and identify untested logic.
 **Then** a combined coverage report is generated for `apps/web` and `apps/api`.
 **And** the build fails if total line/branch coverage falls below 70% (NFR11).
 **And** the report is accessible as a CI artifact for developer review.
+
+### Story 5.4: Harden CI pipelines and resolve type debt
+
+**Status: done**
+
+As a maintainer,  
+I want the CI pipeline to be green and free of lint/type errors,  
+So that I can trust the build and deployment process.
+
+**Acceptance Criteria:**
+
+**Given** the current state of the codebase  
+**When** I run the CI pipeline (lint, typecheck, build, test)  
+**Then** all jobs pass without errors or warnings  
+**And** any remaining "any" types or implicit any errors in tests are resolved  
+**And** the CI configuration is verified for accuracy.
+

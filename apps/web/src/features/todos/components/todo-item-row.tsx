@@ -132,8 +132,8 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
           className="h-6 w-6 shrink-0 cursor-pointer rounded border-zinc-300 text-zinc-900 focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-600 dark:focus-visible:ring-zinc-400"
           aria-label={
             todo.isCompleted
-              ? `Mark task active: ${todo.description || "unnamed task"}`
-              : `Complete task: ${todo.description || "unnamed task"}`
+              ? `Mark task active: ${todo.description?.trim() || "unnamed task"}`
+              : `Complete task: ${todo.description?.trim() || "unnamed task"}`
           }
           aria-describedby={lastCompleteError ? completeErrorId : undefined}
         />
@@ -241,7 +241,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
             },
           });
         }}
-        aria-label={`Delete '${todo.description || "task"}'`}
+        aria-label={`Delete '${todo.description?.trim() || "unnamed task"}'`}
         aria-describedby={lastDeleteError ? deleteErrorId : undefined}
         className="h-11 shrink-0 truncate rounded-lg px-4 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 dark:focus-visible:ring-zinc-400"
       >

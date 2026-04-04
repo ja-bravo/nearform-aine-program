@@ -20,18 +20,15 @@ export function usePersistenceStatus({
   const [showSaved, setShowSaved] = useState(false);
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
     let hideTimer: ReturnType<typeof setTimeout>;
 
     if (isSuccess) {
-      timer = setTimeout(() => setShowSaved(true), 0);
-      hideTimer = setTimeout(() => setShowSaved(false), timeoutMs);
+      setShowSaved(true);
+      hideTimer = setTimeout(() => setShowSaved(false), timeoutMs ?? 3000);
     } else if (isPending) {
-      // If we start a new mutation, clear the "Saved" state immediately
-      timer = setTimeout(() => setShowSaved(false), 0);
+      setShowSaved(false);
     }
     return () => {
-      if (timer) clearTimeout(timer);
       if (hideTimer) clearTimeout(hideTimer);
     };
   }, [isSuccess, isPending, timeoutMs]);
