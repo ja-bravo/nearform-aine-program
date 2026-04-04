@@ -17,7 +17,9 @@ describe("OfflineReadOnlyBanner", () => {
       onlineManager.setOnline(false);
     });
     render(<OfflineReadOnlyBanner />);
-    expect(screen.getByText(/You are offline/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Offline: You are currently disconnected/i)
+    ).toBeInTheDocument();
   });
 
   it("renders nothing when isOnline is true", () => {
@@ -32,7 +34,7 @@ describe("OfflineReadOnlyBanner", () => {
     render(<OfflineReadOnlyBanner />);
     const banner = screen.getByRole("alert");
     // Verify it has warning background and text color
-    expect(banner).toHaveClass("bg-[#D97706]");
+    expect(banner).toHaveClass("bg-[#A15504]");
     expect(banner).toHaveClass("text-white");
     // Verify icon is present
     expect(banner.querySelector("svg")).toBeInTheDocument();

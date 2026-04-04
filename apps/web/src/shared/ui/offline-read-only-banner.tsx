@@ -25,6 +25,7 @@ export const OfflineReadOnlyBanner: FC = () => {
   return (
     <div
       role="alert"
+      data-testid="offline-banner"
       className="sticky top-0 z-50 flex items-center justify-center gap-2 bg-[#A15504] px-4 py-2 text-sm font-medium text-white shadow-md transition-all animate-in fade-in slide-in-from-top-full duration-300"
     >
       <svg

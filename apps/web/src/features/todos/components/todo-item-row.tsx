@@ -119,6 +119,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
   return (
     <li
       ref={liRef}
+      data-testid="todo-item-row"
       className="flex items-start gap-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-6"
     >
       <div className="flex shrink-0 items-center justify-center p-2 -m-2">

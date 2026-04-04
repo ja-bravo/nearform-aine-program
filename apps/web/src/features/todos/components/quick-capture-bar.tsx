@@ -84,6 +84,7 @@ export function QuickCaptureBar() {
   return (
     <form
       onSubmit={onSubmit}
+      data-testid="quick-capture-bar"
       className="flex flex-col gap-2 p-2 sm:flex-row sm:items-end"
     >
       <div className="min-w-0 flex-1">

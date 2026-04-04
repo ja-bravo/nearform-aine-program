@@ -1,8 +1,47 @@
 # Story 4.4: Validate Accessibility and Responsive Quality Gates
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: This story is created by the BMad Method story-creation workflow. -->
+
+## Dev Agent Record
+
+### Implementation Plan
+- Initialize Playwright in `apps/web` with standard configuration.
+- Install `@axe-core/playwright` for automated accessibility scanning.
+- Implement a11y tests for Home page (online/offline states).
+- Implement responsive viewport tests for Mobile, Tablet, and Desktop breakpoints.
+- Add `test:e2e` and `quality-gate` scripts to `package.json`.
+- Add `data-testid` to key components to improve E2E test reliability.
+
+### Debug Log
+- Encountered port 3000 conflict with Docker `web` service. Resolved by stopping the docker container for local testing.
+- Fixed E2E offline test by changing the sequence (goto first, then setOffline) and adding a manual `offline` event trigger.
+- Fixed regression in `OfflineReadOnlyBanner.spec.tsx` where test was out of sync with actual implementation.
+
+### Completion Notes
+- Playwright E2E framework is fully functional.
+- Accessibility scans cover both regular state and the offline banner.
+- Responsive tests verify layout integrity across all target breakpoints.
+- All tests pass: 5 E2E tests and updated unit tests.
+
+## File List
+- `apps/web/package.json`
+- `apps/web/playwright.config.ts`
+- `apps/web/e2e/a11y/todo-list.axe.spec.ts`
+- `apps/web/e2e/responsive/todo-layout.spec.ts`
+- `apps/web/src/features/todos/components/quick-capture-bar.tsx`
+- `apps/web/src/features/todos/components/todo-item-row.tsx`
+- `apps/web/src/shared/ui/offline-read-only-banner.tsx`
+- `apps/web/src/shared/ui/offline-read-only-banner.spec.tsx`
+
+## Change Log
+- **2026-04-04:** Initial implementation of Story 4.4.
+  - Setup Playwright and Axe-Core.
+  - Added automated a11y scans for WCAG 2.2 AA.
+  - Added responsive viewport quality gates.
+  - Added `data-testid` for robust testing.
+  - Fixed regression in `OfflineReadOnlyBanner` tests.
 
 ## Story
 
@@ -36,29 +75,29 @@ so that **regressions are caught before release**.
 
 ## Tasks / Subtasks
 
-- [ ] **T1 — Playwright & Axe-Core Initialization** (AC1, AC2)
-  - [ ] Initialize Playwright in `apps/web` (recommend `pnpm create playwright` or manual setup to match project structure).
-  - [ ] Install `@axe-core/playwright` as a dev dependency.
-  - [ ] Configure `apps/web/playwright.config.ts`:
-    - Set `baseURL` to `http://localhost:3000`.
-    - Configure `webServer` to run `pnpm dev`.
-    - Define projects for `chromium`, `firefox`, `webkit`, and `Mobile Safari`.
+- [x] **T1 — Playwright & Axe-Core Initialization** (AC1, AC2)
+  - [x] Initialize Playwright in `apps/web` (recommend `pnpm create playwright` or manual setup to match project structure).
+  - [x] Install `@axe-core/playwright` as a dev dependency.
+  - [x] Configure `apps/web/playwright.config.ts`:
+    - [x] Set `baseURL` to `http://localhost:3000`.
+    - [x] Configure `webServer` to run `pnpm dev`.
+    - [x] Define projects for `chromium`, `firefox`, `webkit`, and `Mobile Safari`.
 
-- [ ] **T2 — Implement Automated Accessibility Scans** (AC2)
-  - [ ] Create `apps/web/e2e/a11y/todo-list.axe.spec.ts`.
-  - [ ] Implement a test that uses `AxeBuilder` to scan the home page.
-  - [ ] Ensure the scan includes checks for WCAG 2.2 Level AA.
-  - [ ] Verify that custom components like `PersistenceStatusBadge` and `OfflineReadOnlyBanner` (if rendered) pass accessibility checks.
+- [x] **T2 — Implement Automated Accessibility Scans** (AC2)
+  - [x] Create `apps/web/e2e/a11y/todo-list.axe.spec.ts`.
+  - [x] Implement a test that uses `AxeBuilder` to scan the home page.
+  - [x] Ensure the scan includes checks for WCAG 2.2 Level AA.
+  - [x] Verify that custom components like `PersistenceStatusBadge` and `OfflineReadOnlyBanner` (if rendered) pass accessibility checks.
 
-- [ ] **T3 — Implement Responsive Viewport Tests** (AC3)
-  - [ ] Create `apps/web/e2e/responsive/todo-layout.spec.ts`.
-  - [ ] Write tests that iterate through the three standard breakpoints (320px, 768px, 1024px).
-  - [ ] For each breakpoint, verify that the `QuickCaptureBar` and `TodoItemRow` controls are accessible and not overlapping.
+- [x] **T3 — Implement Responsive Viewport Tests** (AC3)
+  - [x] Create `apps/web/e2e/responsive/todo-layout.spec.ts`.
+  - [x] Write tests that iterate through the three standard breakpoints (320px, 768px, 1024px).
+  - [x] For each breakpoint, verify that the `QuickCaptureBar` and `TodoItemRow` controls are accessible and not overlapping.
 
-- [ ] **T4 — Define Quality Gate Scripts** (AC4)
-  - [ ] Add `"test:e2e": "playwright test"` to `apps/web/package.json`.
-  - [ ] Add `"quality-gate": "pnpm test:e2e --project=chromium --grep @a11y|@responsive"` (or equivalent filtering).
-  - [ ] Verify all tests pass locally.
+- [x] **T4 — Define Quality Gate Scripts** (AC4)
+  - [x] Add `"test:e2e": "playwright test"` to `apps/web/package.json`.
+  - [x] Add `"quality-gate": "pnpm test:e2e --project=chromium --grep @a11y|@responsive"`.
+  - [x] Verify all tests pass locally.
 
 ## Developer Guardrails
 
