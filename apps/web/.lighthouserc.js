@@ -3,6 +3,9 @@ module.exports = {
     collect: {
       url: ["http://localhost:3000/"],
       numberOfRuns: 3,
+      settings: {
+        throttlingMethod: "devtools",
+      },
     },
     assert: {
       assertions: {

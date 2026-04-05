@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { TodoHome } from "@/features/todos/components/todo-home";
+import { LoadingState } from "@/shared/ui/loading-state";
 
 export default function Home() {
   return (
@@ -12,7 +14,9 @@ export default function Home() {
             Capture quickly; your list comes from the server.
           </p>
         </header>
-        <TodoHome />
+        <Suspense fallback={<LoadingState />}>
+          <TodoHome />
+        </Suspense>
       </div>
     </main>
   );

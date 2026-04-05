@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { A11yAnnouncer } from "@/shared/ui/a11y-announcer";
 import { OfflineReadOnlyBanner } from "@/shared/ui/offline-read-only-banner";
+import { getApiBaseUrl } from "@/shared/api/env";
 import { QueryProvider } from "./query-provider";
 
 const inter = Inter({
@@ -20,8 +21,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const apiBaseUrl = getApiBaseUrl();
+
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
+      <head>
+        {apiBaseUrl && (
+          <link
+            rel="preconnect"
+            href={apiBaseUrl}
+            crossOrigin="anonymous"
+          />
+        )}
+      </head>
       <body className="min-h-full flex flex-col font-sans">
         <QueryProvider>
           <A11yAnnouncer />

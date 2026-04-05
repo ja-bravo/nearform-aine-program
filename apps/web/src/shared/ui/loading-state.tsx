@@ -1,5 +1,3 @@
-"use client";
-
 import { FC } from "react";
 
 interface LoadingStateProps {
@@ -7,7 +5,7 @@ interface LoadingStateProps {
 }
 
 export const LoadingState: FC<LoadingStateProps> = ({
-  message = "Loading...",
+  message = "Loading tasks",
 }) => {
   return (
     <div
@@ -16,7 +14,9 @@ export const LoadingState: FC<LoadingStateProps> = ({
       aria-live="polite"
       aria-busy="true"
     >
-      <span className="sr-only">{message}</span>
+      <h2 className="text-lg font-medium text-zinc-800 dark:text-zinc-100">
+        {message}
+      </h2>
       {[0, 1, 2].map((i) => (
         <div
           key={i}
