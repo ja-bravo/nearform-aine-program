@@ -5,7 +5,8 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": ["NEXT_PUBLIC_API_BASE_URL"]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -25,12 +26,17 @@
     "test:e2e": {
       "dependsOn": ["^build"],
       "outputs": ["apps/web/test-results/**", "apps/web/playwright-report/**"],
-      "env": ["DATABASE_URL", "NEXT_PUBLIC_API_BASE_URL"]
+      "env": ["DATABASE_URL", "NEXT_PUBLIC_API_BASE_URL", "BASE_URL"]
     },
     "quality-gate": {
       "dependsOn": ["^build"],
       "outputs": ["apps/web/test-results/**", "apps/web/playwright-report/**"],
-      "env": ["SKIP_PW_WEBSERVER", "BASE_URL", "DATABASE_URL", "NEXT_PUBLIC_API_BASE_URL"]
+      "env": [
+        "SKIP_PW_WEBSERVER",
+        "BASE_URL",
+        "DATABASE_URL",
+        "NEXT_PUBLIC_API_BASE_URL"
+      ]
     },
     "dev": {
       "cache": false,

@@ -71,6 +71,8 @@ jobs:
             ${{ runner.os }}-turbo-
       - name: Build
         run: pnpm turbo run build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: ${{ env.NEXT_PUBLIC_API_BASE_URL }}
 
   test-unit:
     name: Unit & Integration Tests
@@ -175,11 +177,14 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Build
         run: pnpm turbo run build --filter web --filter api
+        env:
+          NEXT_PUBLIC_API_BASE_URL: ${{ env.NEXT_PUBLIC_API_BASE_URL }}
       - name: Run E2E tests
         run: pnpm turbo run test:e2e -- --project=chromium --shard=${{ matrix.shard || 1 }}/4
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           NEXT_PUBLIC_API_BASE_URL: ${{ env.NEXT_PUBLIC_API_BASE_URL }}
+          BASE_URL: http://localhost:3000
       - name: Upload artifacts
         if: failure()
         uses: actions/upload-artifact@v4
@@ -242,6 +247,8 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Build
         run: pnpm turbo run build --filter web --filter api
+        env:
+          NEXT_PUBLIC_API_BASE_URL: ${{ env.NEXT_PUBLIC_API_BASE_URL }}
       - name: Detect changed E2E specs
         id: changed-specs
         run: |
@@ -261,6 +268,7 @@ jobs:
           SPECS: ${{ steps.changed-specs.outputs.specs }}
           DATABASE_URL: ${{ env.DATABASE_URL }}
           NEXT_PUBLIC_API_BASE_URL: ${{ env.NEXT_PUBLIC_API_BASE_URL }}
+          BASE_URL: http://localhost:3000
         run: |
           # Security: inputs passed through env: to prevent script injection
           echo "🔥 Starting burn-in loop for changed specs"
@@ -269,7 +277,7 @@ jobs:
             echo "🔥 Burn-in iteration $i/${{ env.BURN_IN_ITERATIONS }}"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             # Security: SPECS referenced as env var
-            pnpm turbo run test:e2e -- --project=chromium "$SPECS" || exit 1
+            pnpm turbo run test:e2e --force -- --project=chromium $SPECS || exit 1
           done
           echo "✅ Burn-in complete - no flaky tests detected"
       - name: Upload artifacts
@@ -330,6 +338,8 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Build
         run: pnpm turbo run build --filter web --filter api
+        env:
+          NEXT_PUBLIC_API_BASE_URL: ${{ env.NEXT_PUBLIC_API_BASE_URL }}
       - name: Start API
         run: pnpm --filter api start > api.log 2>&1 &
         env:
