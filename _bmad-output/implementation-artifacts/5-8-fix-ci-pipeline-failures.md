@@ -40,6 +40,7 @@ context: []
 - `apps/web/e2e/todo-happy-path.spec.ts` -- E2E test with flakiness.
 - `.github/workflows/test.yml` -- CI workflow configuration.
 - `apps/web/eslint.config.mjs` -- ESLint configuration to ignore coverage.
+- `turbo.json` -- Monorepo task pipeline configuration.
 
 ## Tasks & Acceptance
 
@@ -49,11 +50,13 @@ context: []
 - [x] `apps/web/e2e/todo-happy-path.spec.ts` -- Add 100ms delay to API route mocks.
 - [x] `.github/workflows/test.yml` -- Add `pnpm turbo run build` step to `test-e2e` and `burn-in` jobs.
 - [x] `apps/web/eslint.config.mjs` -- Add `coverage/**` to global ignores.
+- [x] `turbo.json` -- Add `quality-gate` task to enable running it via Turbo.
 
 **Acceptance Criteria:**
 - Given a clean environment, when `pnpm turbo run lint` is executed, then no errors are reported.
 - Given the web app, when `pnpm turbo run test --filter web` is executed, then all unit tests pass.
 - Given a running postgres DB and `DATABASE_URL` set, when `pnpm --filter web test:e2e --project=chromium` is executed, then all E2E tests pass including 'Saving' state checks.
+- Given the monorepo, when `pnpm turbo run quality-gate` is executed, then the task is found and executed correctly.
 
 ## Verification
 
@@ -94,3 +97,8 @@ context: []
 
 - Ignore coverage directory to prevent linting auto-generated files.
   [`eslint.config.mjs:12`](../../apps/web/eslint.config.mjs#L12)
+
+**Turbo Configuration**
+
+- Add quality-gate task to enable running it via Turbo.
+  [`turbo.json:29`](../../turbo.json#L29)

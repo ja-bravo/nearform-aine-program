@@ -26,6 +26,10 @@
       "dependsOn": ["^build"],
       "outputs": ["apps/web/test-results/**", "apps/web/playwright-report/**"]
     },
+    "quality-gate": {
+      "dependsOn": ["^build"],
+      "outputs": ["apps/web/test-results/**", "apps/web/playwright-report/**"]
+    },
     "dev": {
       "cache": false,
       "persistent": true
