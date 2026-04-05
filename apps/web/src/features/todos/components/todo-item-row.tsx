@@ -142,7 +142,7 @@ export function TodoItemRow({ todo }: TodoItemRowProps) {
         <p
           className={`break-all text-sm font-medium ${
             todo.isCompleted
-              ? "text-zinc-500 line-through dark:text-zinc-500"
+              ? "text-zinc-500 line-through dark:text-zinc-400"
               : "text-zinc-900 dark:text-zinc-50"
           }`}
         >
