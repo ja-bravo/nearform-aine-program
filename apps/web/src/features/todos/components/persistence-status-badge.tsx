@@ -85,21 +85,25 @@ export const PersistenceStatusBadge: FC<PersistenceStatusBadgeProps> = ({
   status,
   "data-testid": dataTestId,
 }) => {
-  const currentStatus = status && config[status];
+  const [displayStatus, setDisplayStatus] = useState<PersistenceStatus>(status);
   const [shouldRender, setShouldRender] = useState(!!status);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     if (status) {
-      timer = setTimeout(() => setShouldRender(true), 0);
+      setDisplayStatus(status);
+      setShouldRender(true);
     } else {
-      timer = setTimeout(() => setShouldRender(false), 300);
+      // Keep the display status during the fade-out transition
+      timer = setTimeout(() => {
+        setDisplayStatus(null);
+        setShouldRender(false);
+      }, 300);
     }
     return () => clearTimeout(timer);
   }, [status]);
 
-  if (!shouldRender && !status)
-    return <div className="h-5" data-testid={dataTestId} />;
+  const currentStatus = displayStatus && config[displayStatus];
 
   return (
     <div
@@ -110,7 +114,7 @@ export const PersistenceStatusBadge: FC<PersistenceStatusBadgeProps> = ({
         status ? "scale-100 opacity-100" : "scale-95 opacity-0"
       }`}
     >
-      {(status || shouldRender) && currentStatus && (
+      {shouldRender && currentStatus && (
         <span
           className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${currentStatus.className}`}
         >

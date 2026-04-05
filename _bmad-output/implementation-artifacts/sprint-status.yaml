@@ -78,4 +78,5 @@ development_status:
   5-4-harden-ci-pipelines-and-resolve-type-debt: done
   5-5-configure-performance-budgets-and-ci-quality-gates: done
   5-6-fix-ci-playwright-installation-and-timeout-issues: done
+  5-7-fix-ci-missing-build-artifacts: done
   epic-5-retrospective: optional

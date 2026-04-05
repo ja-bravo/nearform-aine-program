@@ -314,6 +314,8 @@ jobs:
           key: ${{ runner.os }}-turbo-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-
+      - name: Build
+        run: pnpm turbo run build
       - name: Start API
         run: pnpm --filter api start > api.log 2>&1 &
         env:
