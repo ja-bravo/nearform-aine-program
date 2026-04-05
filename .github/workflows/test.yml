@@ -343,10 +343,12 @@ jobs:
           configPath: ./apps/web/.lighthouserc.js
           uploadArtifacts: true
           temporaryPublicStorage: true
+      - name: Setup K6
+        uses: grafana/setup-k6-action@v1
       - name: Run k6 Load Tests
-        uses: grafana/k6-action@v0.5.0
+        uses: grafana/run-k6-action@v1
         with:
-          filename: perf/k6/api-read-scenarios.js
+          path: perf/k6/api-read-scenarios.js
           flags: --summary-export=k6-summary.json
         env:
           K6_API_BASE_URL: http://localhost:3001
