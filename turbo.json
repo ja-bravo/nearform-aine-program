@@ -28,7 +28,8 @@
     },
     "quality-gate": {
       "dependsOn": ["^build"],
-      "outputs": ["apps/web/test-results/**", "apps/web/playwright-report/**"]
+      "outputs": ["apps/web/test-results/**", "apps/web/playwright-report/**"],
+      "env": ["SKIP_PW_WEBSERVER", "BASE_URL"]
     },
     "dev": {
       "cache": false,

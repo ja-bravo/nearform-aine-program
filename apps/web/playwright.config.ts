@@ -65,13 +65,13 @@ export default defineConfig({
             ? "pnpm -C ../api start"
             : "pnpm --filter api dev",
           url: "http://localhost:3001/healthz/live",
-          reuseExistingServer: !process.env.CI,
+          reuseExistingServer: true,
           timeout: 120 * 1000,
         },
         {
           command: process.env.CI ? "pnpm start" : "pnpm dev",
           url: "http://localhost:3000/healthz",
-          reuseExistingServer: !process.env.CI,
+          reuseExistingServer: true,
           timeout: 120 * 1000,
         },
       ],

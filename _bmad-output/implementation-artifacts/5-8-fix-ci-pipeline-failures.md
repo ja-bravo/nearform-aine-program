@@ -50,13 +50,14 @@ context: []
 - [x] `apps/web/e2e/todo-happy-path.spec.ts` -- Add 100ms delay to API route mocks.
 - [x] `.github/workflows/test.yml` -- Add `pnpm turbo run build` step to `test-e2e` and `burn-in` jobs.
 - [x] `apps/web/eslint.config.mjs` -- Add `coverage/**` to global ignores.
-- [x] `turbo.json` -- Add `quality-gate` task to enable running it via Turbo.
+- [x] `turbo.json` -- Add `quality-gate` task and pass CI environment variables.
+- [x] `apps/web/playwright.config.ts` -- Enable `reuseExistingServer` on CI to avoid port conflicts.
 
 **Acceptance Criteria:**
 - Given a clean environment, when `pnpm turbo run lint` is executed, then no errors are reported.
 - Given the web app, when `pnpm turbo run test --filter web` is executed, then all unit tests pass.
 - Given a running postgres DB and `DATABASE_URL` set, when `pnpm --filter web test:e2e --project=chromium` is executed, then all E2E tests pass including 'Saving' state checks.
-- Given the monorepo, when `pnpm turbo run quality-gate` is executed, then the task is found and executed correctly.
+- Given the monorepo, when `pnpm turbo run quality-gate` is executed, then the task is found and executed correctly without port conflicts even if servers are already running.
 
 ## Verification
 
@@ -100,5 +101,10 @@ context: []
 
 **Turbo Configuration**
 
-- Add quality-gate task to enable running it via Turbo.
+- Add quality-gate task and pass environment variables to resolve CI port conflicts.
   [`turbo.json:29`](../../turbo.json#L29)
+
+**Playwright Configuration**
+
+- Enable server reuse on CI to prevent "port already in use" errors.
+  [`playwright.config.ts:68`](../../apps/web/playwright.config.ts#L68)
