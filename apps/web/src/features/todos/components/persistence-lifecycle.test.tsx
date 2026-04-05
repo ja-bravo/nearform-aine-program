@@ -80,9 +80,14 @@ describe("Persistence Lifecycle", () => {
     // Should show 'Saved'
     expect(screen.getByText("Saved")).toBeInTheDocument();
 
-    // Fast-forward time
+    // Fast-forward time for usePersistenceStatus (3000ms)
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3000);
+    });
+
+    // Fast-forward time for PersistenceStatusBadge fade-out (300ms)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
     });
 
     // Should be hidden

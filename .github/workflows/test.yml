@@ -173,6 +173,8 @@ jobs:
       - name: Install Playwright browsers
         working-directory: apps/web
         run: pnpm exec playwright install --with-deps chromium
+      - name: Build
+        run: pnpm turbo run build --filter web --filter api
       - name: Run E2E tests
         run: pnpm turbo run test:e2e -- --project=chromium --shard=${{ matrix.shard || 1 }}/4
         env:
@@ -238,6 +240,8 @@ jobs:
       - name: Install Playwright browsers
         working-directory: apps/web
         run: pnpm exec playwright install --with-deps chromium
+      - name: Build
+        run: pnpm turbo run build --filter web --filter api
       - name: Detect changed E2E specs
         id: changed-specs
         run: |
@@ -315,7 +319,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
       - name: Build
-        run: pnpm turbo run build
+        run: pnpm turbo run build --filter web --filter api
       - name: Start API
         run: pnpm --filter api start > api.log 2>&1 &
         env:

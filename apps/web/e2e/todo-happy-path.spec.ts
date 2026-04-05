@@ -10,10 +10,12 @@ test.describe("Todo Happy Path", () => {
 
     // Slow down the API to ensure we see the 'Saving' state
     await page.route("**/api/v1/todos/**", async (route) => {
+      await new Promise((f) => setTimeout(f, 100));
       await route.continue();
     });
     // Also for the base collection URL
     await page.route("**/api/v1/todos", async (route) => {
+      await new Promise((f) => setTimeout(f, 100));
       await route.continue();
     });
 

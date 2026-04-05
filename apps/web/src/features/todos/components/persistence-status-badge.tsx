@@ -87,13 +87,20 @@ export const PersistenceStatusBadge: FC<PersistenceStatusBadgeProps> = ({
 }) => {
   const [displayStatus, setDisplayStatus] = useState<PersistenceStatus>(status);
   const [shouldRender, setShouldRender] = useState(!!status);
+  const [prevStatus, setPrevStatus] = useState<PersistenceStatus>(status);
 
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
+  if (status !== prevStatus) {
+    setPrevStatus(status);
     if (status) {
       setDisplayStatus(status);
       setShouldRender(true);
-    } else {
+    }
+  }
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    // Only start fade-out timer if we were showing something and now status is null
+    if (!status && displayStatus) {
       // Keep the display status during the fade-out transition
       timer = setTimeout(() => {
         setDisplayStatus(null);
@@ -101,7 +108,7 @@ export const PersistenceStatusBadge: FC<PersistenceStatusBadgeProps> = ({
       }, 300);
     }
     return () => clearTimeout(timer);
-  }, [status]);
+  }, [status, displayStatus]);
 
   const currentStatus = displayStatus && config[displayStatus];
 
