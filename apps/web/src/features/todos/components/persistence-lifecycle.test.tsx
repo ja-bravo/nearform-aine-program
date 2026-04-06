@@ -1,19 +1,8 @@
-import {
-  QueryClient,
-  QueryClientProvider,
-  onlineManager,
-} from "@tanstack/react-query";
-import {
-  cleanup,
-  render,
-  screen,
-  waitFor,
-  fireEvent,
-  act,
-} from "@testing-library/react";
-import type { ReactElement } from "react";
+import { onlineManager } from "@tanstack/react-query";
+import { cleanup, screen, waitFor, fireEvent, act } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TodoItemRow } from "./todo-item-row";
+import { renderWithTodosClient } from "@/features/todos/test/render-with-todos-client";
 
 const fixedId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
 const activeTodo = {
@@ -22,18 +11,6 @@ const activeTodo = {
   isCompleted: false,
   createdAt: "2026-04-01T12:00:00.000Z",
 };
-
-function renderWithClient(ui: ReactElement) {
-  const client = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-  return render(
-    <QueryClientProvider client={client}>{ui}</QueryClientProvider>
-  );
-}
 
 describe("Persistence Lifecycle", () => {
   beforeEach(() => {
@@ -65,7 +42,7 @@ describe("Persistence Lifecycle", () => {
       )
     );
 
-    renderWithClient(<TodoItemRow todo={activeTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
 
     // Click toggle
     fireEvent.click(
@@ -106,7 +83,7 @@ describe("Persistence Lifecycle", () => {
       )
     );
 
-    renderWithClient(<TodoItemRow todo={activeTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
     fireEvent.click(
       screen.getByRole("checkbox", { name: /complete task: test task/i })
     );
@@ -122,7 +99,7 @@ describe("Persistence Lifecycle", () => {
     // Never resolve
     fetchMock.mockReturnValue(new Promise(() => {}));
 
-    renderWithClient(<TodoItemRow todo={activeTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
     fireEvent.click(
       screen.getByRole("button", { name: /delete 'test task'/i })
     );

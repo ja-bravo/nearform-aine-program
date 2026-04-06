@@ -7,6 +7,7 @@ import {
   type QuickCaptureValues,
   quickCaptureSchema,
 } from "@/features/todos/capture-schema";
+import { useTodosSync } from "@/features/todos/components/todos-sync-context";
 import { useCreateTodoMutation } from "@/features/todos/hooks/use-create-todo-mutation";
 import { usePersistenceStatus } from "@/features/todos/hooks/use-persistence-status";
 import { useConnectivity } from "@/shared/hooks/use-connectivity";
@@ -17,7 +18,10 @@ import { announce } from "@/shared/ui/a11y-announcer";
 const ERROR_MESSAGE_FALLBACK = "Could not save your task. Try again.";
 
 export function QuickCaptureBar() {
-  const mutation = useCreateTodoMutation();
+  const { prependTodo } = useTodosSync();
+  const mutation = useCreateTodoMutation({
+    onTodoCreated: prependTodo,
+  });
   const [lastError, setLastError] = useState<string | null>(null);
   const { isReadOnly } = useConnectivity();
 

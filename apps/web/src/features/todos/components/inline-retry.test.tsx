@@ -1,10 +1,9 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TodoItemRow } from "./todo-item-row";
 import { QuickCaptureBar } from "./quick-capture-bar";
+import { renderWithTodosClient } from "@/features/todos/test/render-with-todos-client";
 
 const fixedId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
 const activeTodo = {
@@ -13,18 +12,6 @@ const activeTodo = {
   isCompleted: false,
   createdAt: "2026-04-01T12:00:00.000Z",
 };
-
-function renderWithClient(ui: ReactElement) {
-  const client = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-  return render(
-    <QueryClientProvider client={client}>{ui}</QueryClientProvider>
-  );
-}
 
 describe("Inline Retry Behavior", () => {
   beforeEach(() => {
@@ -55,7 +42,7 @@ describe("Inline Retry Behavior", () => {
         )
       );
 
-      renderWithClient(<TodoItemRow todo={activeTodo} />);
+      renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
 
       // Trigger initial failure
       await user.click(
@@ -91,7 +78,7 @@ describe("Inline Retry Behavior", () => {
         )
       );
 
-      renderWithClient(<TodoItemRow todo={activeTodo} />);
+      renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
       await user.click(
         screen.getByRole("checkbox", { name: /complete task: buy milk/i })
       );
@@ -134,7 +121,7 @@ describe("Inline Retry Behavior", () => {
         )
       );
 
-      renderWithClient(<QuickCaptureBar />);
+      renderWithTodosClient(<QuickCaptureBar />);
       const input = screen.getByRole("textbox", { name: /new task/i });
       await user.type(input, "My new task");
       await user.click(screen.getByRole("button", { name: /add task/i }));

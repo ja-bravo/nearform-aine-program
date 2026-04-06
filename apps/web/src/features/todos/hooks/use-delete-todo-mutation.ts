@@ -1,9 +1,14 @@
 import { z } from "zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { fetchJson } from "@/shared/api/fetch-json";
 
-export function useDeleteTodoMutation() {
-  const queryClient = useQueryClient();
+type UseDeleteTodoMutationOptions = {
+  onTodoDeleted?: (id: string) => void;
+};
+
+export function useDeleteTodoMutation(
+  options?: UseDeleteTodoMutationOptions
+) {
   return useMutation({
     mutationFn: (id: string) =>
       fetchJson(
@@ -11,8 +16,8 @@ export function useDeleteTodoMutation() {
         { method: "DELETE" },
         z.null()
       ),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["todos"] });
+    onSuccess: (_data, id) => {
+      options?.onTodoDeleted?.(id);
     },
   });
 }

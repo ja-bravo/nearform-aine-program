@@ -1,9 +1,15 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { fetchJson } from "@/shared/api/fetch-json";
+import type { TodoDto } from "@/shared/api/schemas";
 import { createTodoResponseSchema } from "@/shared/api/schemas";
 
-export function useCreateTodoMutation() {
-  const queryClient = useQueryClient();
+type UseCreateTodoMutationOptions = {
+  onTodoCreated?: (todo: TodoDto) => void;
+};
+
+export function useCreateTodoMutation(
+  options?: UseCreateTodoMutationOptions
+) {
   return useMutation({
     mutationFn: (body: { description: string }) =>
       fetchJson(
@@ -14,8 +20,8 @@ export function useCreateTodoMutation() {
         },
         createTodoResponseSchema
       ),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["todos"] });
+    onSuccess: (data) => {
+      options?.onTodoCreated?.(data.data);
     },
   });
 }

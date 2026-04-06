@@ -1,21 +1,8 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { QuickCaptureBar } from "./quick-capture-bar";
-
-function renderWithClient(ui: ReactElement) {
-  const client = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-  return render(
-    <QueryClientProvider client={client}>{ui}</QueryClientProvider>
-  );
-}
+import { renderWithTodosClient } from "@/features/todos/test/render-with-todos-client";
 
 describe("QuickCaptureBar", () => {
   afterEach(() => {
@@ -29,7 +16,7 @@ describe("QuickCaptureBar", () => {
   it("does not call fetch when description is empty", async () => {
     const user = userEvent.setup();
     const fetchMock = vi.mocked(fetch);
-    renderWithClient(<QuickCaptureBar />);
+    renderWithTodosClient(<QuickCaptureBar />);
     await user.click(screen.getByRole("button", { name: /add task/i }));
     expect(fetchMock).not.toHaveBeenCalled();
     expect(
@@ -40,7 +27,7 @@ describe("QuickCaptureBar", () => {
   it("does not call fetch for whitespace-only description", async () => {
     const user = userEvent.setup();
     const fetchMock = vi.mocked(fetch);
-    renderWithClient(<QuickCaptureBar />);
+    renderWithTodosClient(<QuickCaptureBar />);
     await user.type(screen.getByRole("textbox", { name: /new task/i }), "   ");
     await user.click(screen.getByRole("button", { name: /add task/i }));
     expect(fetchMock).not.toHaveBeenCalled();
@@ -63,7 +50,7 @@ describe("QuickCaptureBar", () => {
         { status: 201, headers: { "Content-Type": "application/json" } }
       )
     );
-    renderWithClient(<QuickCaptureBar />);
+    renderWithTodosClient(<QuickCaptureBar />);
     await user.type(
       screen.getByRole("textbox", { name: /new task/i }),
       "  Buy milk  "

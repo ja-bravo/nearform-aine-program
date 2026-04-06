@@ -1,11 +1,11 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { QuickCaptureBar } from "./quick-capture-bar";
 import { TodoItemRow } from "./todo-item-row";
 import { TodoList } from "./todo-list";
+import { useTodosSync } from "./todos-sync-context";
+import { renderWithTodosClient } from "@/features/todos/test/render-with-todos-client";
 
 const fixedId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
 const fixedId2 = "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22";
@@ -22,16 +22,9 @@ const secondTodo = {
   createdAt: "2026-04-01T13:00:00.000Z",
 };
 
-function renderWithClient(ui: ReactElement) {
-  const client = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-  return render(
-    <QueryClientProvider client={client}>{ui}</QueryClientProvider>
-  );
+function SyncedTodoList() {
+  const { todos } = useTodosSync();
+  return <TodoList todos={todos} loadFailed={false} />;
 }
 
 describe("Keyboard Navigation and Focus Management", () => {
@@ -45,30 +38,28 @@ describe("Keyboard Navigation and Focus Management", () => {
 
   describe("T1 - Visible Focus Indicator", () => {
     it("TodoItemRow checkbox has focus-visible styling", () => {
-      renderWithClient(<TodoItemRow todo={activeTodo} />);
+      renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
       const checkbox = screen.getByRole("checkbox");
-      // Current classes: h-6 w-6 shrink-0 cursor-pointer rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-600 dark:focus:ring-zinc-400
-      // Expected: focus-visible:ring-offset-2
       expect(checkbox.className).toContain("focus-visible");
       expect(checkbox.className).toContain("ring-offset-2");
     });
 
     it("TodoItemRow delete button has focus-visible styling", () => {
-      renderWithClient(<TodoItemRow todo={activeTodo} />);
+      renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
       const deleteBtn = screen.getByRole("button", { name: /delete/i });
       expect(deleteBtn.className).toContain("focus-visible");
       expect(deleteBtn.className).toContain("ring-offset-2");
     });
 
     it("QuickCaptureBar input has focus-visible styling", () => {
-      renderWithClient(<QuickCaptureBar />);
+      renderWithTodosClient(<QuickCaptureBar />);
       const input = screen.getByLabelText(/new task/i);
       expect(input.className).toContain("focus-visible");
       expect(input.className).toContain("ring-offset-2");
     });
 
     it("QuickCaptureBar add button has focus-visible styling", () => {
-      renderWithClient(<QuickCaptureBar />);
+      renderWithTodosClient(<QuickCaptureBar />);
       const addBtn = screen.getByRole("button", { name: /add task/i });
       expect(addBtn.className).toContain("focus-visible");
       expect(addBtn.className).toContain("ring-offset-2");
@@ -89,7 +80,7 @@ describe("Keyboard Navigation and Focus Management", () => {
         )
       );
 
-      renderWithClient(<QuickCaptureBar />);
+      renderWithTodosClient(<QuickCaptureBar />);
       const input = screen.getByLabelText(/new task/i);
       await user.type(input, "New task");
       await user.keyboard("{Enter}");
@@ -104,34 +95,12 @@ describe("Keyboard Navigation and Focus Management", () => {
       const fetchMock = vi.mocked(fetch);
       fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
 
-      const { rerender } = renderWithClient(
-        <TodoList
-          todos={[activeTodo, secondTodo]}
-          isLoading={false}
-          loadFailed={false}
-        />
-      );
+      renderWithTodosClient(<SyncedTodoList />, [activeTodo, secondTodo]);
 
       const deleteBtn = screen.getByRole("button", {
         name: /delete 'buy milk'/i,
       });
       await user.click(deleteBtn);
-
-      // Simulate re-render after successful deletion
-      rerender(
-        <QueryClientProvider
-          client={
-            new QueryClient({
-              defaultOptions: {
-                queries: { retry: false },
-                mutations: { retry: false },
-              },
-            })
-          }
-        >
-          <TodoList todos={[secondTodo]} isLoading={false} loadFailed={false} />
-        </QueryClientProvider>
-      );
 
       await waitFor(() => {
         const secondCheckbox = screen.getByRole("checkbox", {
@@ -156,7 +125,7 @@ describe("Keyboard Navigation and Focus Management", () => {
         )
       );
 
-      renderWithClient(<QuickCaptureBar />);
+      renderWithTodosClient(<QuickCaptureBar />);
       const input = screen.getByLabelText(/new task/i);
       await user.type(input, "New task");
       await user.keyboard("{Enter}");
@@ -177,7 +146,7 @@ describe("Keyboard Navigation and Focus Management", () => {
         )
       );
 
-      renderWithClient(<TodoItemRow todo={activeTodo} />);
+      renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
       const checkbox = screen.getByRole("checkbox");
       checkbox.focus();
       await user.keyboard(" ");

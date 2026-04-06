@@ -183,7 +183,7 @@ pnpm turbo run dev
 
 - API: [http://localhost:3001](http://localhost:3001) — set `API_PORT` / `DATABASE_URL` in `.env` as needed.
 
-The home page loads todos from the API using **`NEXT_PUBLIC_API_BASE_URL`**. The API enables **CORS** for browser calls: set **`CORS_ORIGIN`** to a comma-separated list of allowed web origins (default **`http://localhost:3000`**, aligned with **`WEB_PORT`**). Docker Compose passes **`CORS_ORIGIN`** into the **`api`** service so the UI at **`http://localhost:3000`** can call **`http://localhost:3001`**.
+The home page **server-renders** the initial todo list: the Next.js server calls the API using **`API_BASE_URL`** when set, otherwise **`NEXT_PUBLIC_API_BASE_URL`**. In Docker Compose, **`web`** sets **`API_BASE_URL=http://api:<port>`** so SSR can reach the API on the internal network while the browser still uses **`NEXT_PUBLIC_API_BASE_URL`** (e.g. `http://localhost:3001`). The API enables **CORS** for browser calls: set **`CORS_ORIGIN`** to a comma-separated list of allowed web origins (default **`http://localhost:3000`**, aligned with **`WEB_PORT`**). Docker Compose passes **`CORS_ORIGIN`** into the **`api`** service so the UI at **`http://localhost:3000`** can call **`http://localhost:3001`**.
 
 ## Monorepo tasks
 

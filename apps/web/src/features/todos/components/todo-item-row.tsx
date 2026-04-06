@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { ApiError } from "@/shared/api/api-error";
 import type { TodoDto } from "@/shared/api/schemas";
+import { useTodosSync } from "@/features/todos/components/todos-sync-context";
 import { useCompleteTodoMutation } from "@/features/todos/hooks/use-complete-todo-mutation";
 import { useDeleteTodoMutation } from "@/features/todos/hooks/use-delete-todo-mutation";
 import { usePersistenceStatus } from "@/features/todos/hooks/use-persistence-status";
@@ -36,8 +37,13 @@ const ERROR_DELETE_FALLBACK = "Failed to delete";
 const QUICK_CAPTURE_INPUT_ID = "quick-capture-description";
 
 export function TodoItemRow({ todo }: TodoItemRowProps) {
-  const completeMutation = useCompleteTodoMutation();
-  const deleteMutation = useDeleteTodoMutation();
+  const { updateTodo, removeTodo } = useTodosSync();
+  const completeMutation = useCompleteTodoMutation({
+    onTodoUpdated: updateTodo,
+  });
+  const deleteMutation = useDeleteTodoMutation({
+    onTodoDeleted: removeTodo,
+  });
   const { isReadOnly } = useConnectivity();
   const liRef = useRef<HTMLLIElement>(null);
 

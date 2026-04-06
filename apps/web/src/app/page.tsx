@@ -1,8 +1,15 @@
-import { Suspense } from "react";
-import { TodoHome } from "@/features/todos/components/todo-home";
-import { LoadingState } from "@/shared/ui/loading-state";
+import { TodoAppClient } from "@/features/todos/components/todo-app-client";
+import { loadTodosPageData } from "@/features/todos/server/load-todos";
 
-export default function Home() {
+export default async function Home() {
+  const loaded = await loadTodosPageData();
+  const initialTodos = loaded.kind === "ok" ? loaded.todos : [];
+  const initialLoadError =
+    loaded.kind === "error"
+      ? { message: loaded.message, requestId: loaded.requestId }
+      : undefined;
+  const configBlocked = loaded.kind === "unconfigured";
+
   return (
     <main className="flex flex-1 flex-col bg-zinc-100/80 dark:bg-zinc-950">
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-8">
@@ -14,9 +21,11 @@ export default function Home() {
             Capture quickly; your list comes from the server.
           </p>
         </header>
-        <Suspense fallback={<LoadingState />}>
-          <TodoHome />
-        </Suspense>
+        <TodoAppClient
+          initialTodos={initialTodos}
+          configBlocked={configBlocked}
+          initialLoadError={initialLoadError}
+        />
       </div>
     </main>
   );

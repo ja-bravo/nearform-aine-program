@@ -5,3 +5,11 @@ export function getApiBaseUrl(): string {
   }
   return raw?.replace(/\/$/, "").trim() ?? "";
 }
+
+export function getServerApiBaseUrl(): string {
+  const internal = process.env.API_BASE_URL?.replace(/\/$/, "").trim();
+  if (internal) {
+    return internal;
+  }
+  return getApiBaseUrl();
+}

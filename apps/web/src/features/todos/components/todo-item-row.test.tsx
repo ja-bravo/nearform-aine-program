@@ -1,9 +1,8 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TodoItemRow } from "./todo-item-row";
+import { renderWithTodosClient } from "@/features/todos/test/render-with-todos-client";
 
 const fixedId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
 const activeTodo = {
@@ -13,18 +12,6 @@ const activeTodo = {
   createdAt: "2026-04-01T12:00:00.000Z",
 };
 const completedTodo = { ...activeTodo, isCompleted: true };
-
-function renderWithClient(ui: ReactElement) {
-  const client = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-  return render(
-    <QueryClientProvider client={client}>{ui}</QueryClientProvider>
-  );
-}
 
 describe("TodoItemRow", () => {
   afterEach(() => {
@@ -36,13 +23,15 @@ describe("TodoItemRow", () => {
   });
 
   it("applies line-through class to description of completed todo", () => {
-    renderWithClient(<TodoItemRow todo={completedTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={completedTodo} />, [
+      completedTodo,
+    ]);
     const description = screen.getByText("Buy milk");
     expect(description.className).toContain("line-through");
   });
 
   it("does NOT apply line-through class to active todo description", () => {
-    renderWithClient(<TodoItemRow todo={activeTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
     const description = screen.getByText("Buy milk");
     expect(description.className).not.toContain("line-through");
   });
@@ -64,7 +53,7 @@ describe("TodoItemRow", () => {
         { status: 200, headers: { "Content-Type": "application/json" } }
       )
     );
-    renderWithClient(<TodoItemRow todo={activeTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
     await user.click(
       screen.getByRole("checkbox", { name: /complete task: buy milk/i })
     );
@@ -94,7 +83,9 @@ describe("TodoItemRow", () => {
         { status: 200, headers: { "Content-Type": "application/json" } }
       )
     );
-    renderWithClient(<TodoItemRow todo={completedTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={completedTodo} />, [
+      completedTodo,
+    ]);
     await user.click(
       screen.getByRole("checkbox", { name: /mark task active: buy milk/i })
     );
@@ -112,7 +103,7 @@ describe("TodoItemRow", () => {
     const fetchMock = vi.mocked(fetch);
     // Never resolves — keeps mutation pending
     fetchMock.mockImplementationOnce(() => new Promise(() => {}));
-    renderWithClient(<TodoItemRow todo={activeTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
     await user.click(
       screen.getByRole("checkbox", { name: /complete task: buy milk/i })
     );
@@ -141,7 +132,7 @@ describe("TodoItemRow", () => {
         { status: 500, headers: { "Content-Type": "application/json" } }
       )
     );
-    renderWithClient(<TodoItemRow todo={activeTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
     await user.click(
       screen.getByRole("checkbox", { name: /complete task: buy milk/i })
     );
@@ -153,7 +144,7 @@ describe("TodoItemRow", () => {
     const user = userEvent.setup();
     const fetchMock = vi.mocked(fetch);
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
-    renderWithClient(<TodoItemRow todo={activeTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
     await user.click(
       screen.getByRole("button", { name: /delete 'buy milk'/i })
     );
@@ -168,7 +159,7 @@ describe("TodoItemRow", () => {
     const fetchMock = vi.mocked(fetch);
     // Never resolves — keeps mutation pending
     fetchMock.mockImplementationOnce(() => new Promise(() => {}));
-    renderWithClient(<TodoItemRow todo={activeTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
     await user.click(
       screen.getByRole("button", { name: /delete 'buy milk'/i })
     );
@@ -197,7 +188,7 @@ describe("TodoItemRow", () => {
         { status: 500, headers: { "Content-Type": "application/json" } }
       )
     );
-    renderWithClient(<TodoItemRow todo={activeTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
     await user.click(
       screen.getByRole("button", { name: /delete 'buy milk'/i })
     );
@@ -206,14 +197,14 @@ describe("TodoItemRow", () => {
   });
 
   it("checkbox has accessible label mentioning todo description", () => {
-    renderWithClient(<TodoItemRow todo={activeTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
     expect(
       screen.getByRole("checkbox", { name: /buy milk/i })
     ).toBeInTheDocument();
   });
 
   it("delete button has accessible label mentioning todo description", () => {
-    renderWithClient(<TodoItemRow todo={activeTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
     expect(
       screen.getByRole("button", { name: /delete 'buy milk'/i })
     ).toBeInTheDocument();
@@ -221,7 +212,7 @@ describe("TodoItemRow", () => {
 
   it("uses fallback 'task' in aria-label when description is empty", () => {
     const emptyTodo = { ...activeTodo, description: "" };
-    renderWithClient(<TodoItemRow todo={emptyTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={emptyTodo} />, [emptyTodo]);
     expect(
       screen.getByRole("checkbox", { name: /complete task: task/i })
     ).toBeInTheDocument();
@@ -232,7 +223,9 @@ describe("TodoItemRow", () => {
 
   it("renders 'Invalid date' when createdAt is malformed", () => {
     const malformedTodo = { ...activeTodo, createdAt: "not-a-date" };
-    renderWithClient(<TodoItemRow todo={malformedTodo} />);
+    renderWithTodosClient(<TodoItemRow todo={malformedTodo} />, [
+      malformedTodo,
+    ]);
     expect(screen.getByText(/added invalid date/i)).toBeInTheDocument();
   });
 });

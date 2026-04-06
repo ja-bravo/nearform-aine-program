@@ -1,10 +1,9 @@
 import type { TodoDto } from "@/shared/api/schemas";
-import { ErrorMessage, LoadingState } from "@/shared/ui";
+import { ErrorMessage } from "@/shared/ui";
 import { TodoItemRow } from "./todo-item-row";
 
 type TodoListProps = {
   todos: TodoDto[];
-  isLoading: boolean;
   loadFailed: boolean;
   errorMessage?: string;
   requestId?: string;
@@ -14,17 +13,12 @@ type TodoListProps = {
 
 export function TodoList({
   todos,
-  isLoading,
   loadFailed,
   errorMessage,
   requestId,
   onRetry,
   isRetrying,
 }: TodoListProps) {
-  if (isLoading) {
-    return <LoadingState message="Loading tasks" />;
-  }
-
   if (loadFailed) {
     return (
       <ErrorMessage

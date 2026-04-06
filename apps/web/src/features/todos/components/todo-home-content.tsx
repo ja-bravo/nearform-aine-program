@@ -1,29 +1,33 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { QuickCaptureBar } from "@/features/todos/components/quick-capture-bar";
 import { TodoList } from "@/features/todos/components/todo-list";
-import { useTodosQuery } from "@/features/todos/hooks/use-todos-query";
-import { ApiError } from "@/shared/api/api-error";
-import { getApiBaseUrl } from "@/shared/api/env";
+import { useTodosSync } from "@/features/todos/components/todos-sync-context";
 
-export function TodoHome() {
-  const base = getApiBaseUrl();
-  const { data, isLoading, isError, error, refetch, isFetching } =
-    useTodosQuery();
+type TodoHomeContentProps = {
+  configBlocked: boolean;
+  initialLoadError?: { message: string; requestId?: string };
+};
 
-  const configMessage = !base
+export function TodoHomeContent({
+  configBlocked,
+  initialLoadError,
+}: TodoHomeContentProps) {
+  const { todos } = useTodosSync();
+  const router = useRouter();
+  const [isRefreshPending, startTransition] = useTransition();
+
+  const configMessage = configBlocked
     ? "App is missing API configuration. Set NEXT_PUBLIC_API_BASE_URL."
     : null;
 
-  const errorMessage =
-    isError && error instanceof ApiError
-      ? error.message
-      : isError
-        ? "Could not load tasks. Try again."
-        : undefined;
-
-  const requestId =
-    isError && error instanceof ApiError ? error.requestId : undefined;
+  const handleListRetry = () => {
+    startTransition(() => {
+      router.refresh();
+    });
+  };
 
   return (
     <>
@@ -49,15 +53,12 @@ export function TodoHome() {
           </p>
         ) : (
           <TodoList
-            todos={data?.data?.todos ?? []}
-            isLoading={isLoading}
-            loadFailed={isError}
-            errorMessage={errorMessage}
-            requestId={requestId}
-            onRetry={() => {
-              void refetch().catch(() => {});
-            }}
-            isRetrying={isFetching}
+            todos={todos}
+            loadFailed={Boolean(initialLoadError)}
+            errorMessage={initialLoadError?.message}
+            requestId={initialLoadError?.requestId}
+            onRetry={initialLoadError ? handleListRetry : undefined}
+            isRetrying={isRefreshPending}
           />
         )}
       </section>

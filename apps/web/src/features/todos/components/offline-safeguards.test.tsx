@@ -1,13 +1,9 @@
-import {
-  QueryClient,
-  QueryClientProvider,
-  onlineManager,
-} from "@tanstack/react-query";
-import { cleanup, render, screen, act } from "@testing-library/react";
-import type { ReactElement } from "react";
+import { onlineManager } from "@tanstack/react-query";
+import { cleanup, screen, act } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TodoItemRow } from "./todo-item-row";
 import { QuickCaptureBar } from "./quick-capture-bar";
+import { renderWithTodosClient } from "@/features/todos/test/render-with-todos-client";
 
 const fixedId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
 const activeTodo = {
@@ -16,18 +12,6 @@ const activeTodo = {
   isCompleted: false,
   createdAt: "2026-04-01T12:00:00.000Z",
 };
-
-function renderWithClient(ui: ReactElement) {
-  const client = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-  return render(
-    <QueryClientProvider client={client}>{ui}</QueryClientProvider>
-  );
-}
 
 describe("Offline Safeguards", () => {
   beforeEach(() => {
@@ -49,7 +33,7 @@ describe("Offline Safeguards", () => {
       act(() => {
         onlineManager.setOnline(false);
       });
-      renderWithClient(<QuickCaptureBar />);
+      renderWithTodosClient(<QuickCaptureBar />);
 
       const addButton = screen.getByRole("button", { name: /add task/i });
       expect(addButton).toBeDisabled();
@@ -59,7 +43,7 @@ describe("Offline Safeguards", () => {
       act(() => {
         onlineManager.setOnline(false);
       });
-      renderWithClient(<QuickCaptureBar />);
+      renderWithTodosClient(<QuickCaptureBar />);
 
       const addButton = screen.getByRole("button", { name: /add task/i });
       expect(addButton).toBeDisabled();
@@ -77,7 +61,7 @@ describe("Offline Safeguards", () => {
       act(() => {
         onlineManager.setOnline(false);
       });
-      renderWithClient(<TodoItemRow todo={activeTodo} />);
+      renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
 
       const checkbox = screen.getByRole("checkbox", {
         name: /complete task: buy milk/i,
@@ -92,7 +76,7 @@ describe("Offline Safeguards", () => {
       act(() => {
         onlineManager.setOnline(false);
       });
-      renderWithClient(<TodoItemRow todo={activeTodo} />);
+      renderWithTodosClient(<TodoItemRow todo={activeTodo} />, [activeTodo]);
 
       const checkbox = screen.getByRole("checkbox", {
         name: /complete task: buy milk/i,
