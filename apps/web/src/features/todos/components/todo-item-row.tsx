@@ -11,9 +11,10 @@ import { useConnectivity } from "@/shared/hooks/use-connectivity";
 import { PersistenceStatusBadge } from "./persistence-status-badge";
 import { announce } from "@/shared/ui/a11y-announcer";
 
-const createdAtFormatter = new Intl.DateTimeFormat(undefined, {
+const createdAtFormatter = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
+  timeZone: "UTC",
 });
 
 function formatCreatedAt(iso: string): string {

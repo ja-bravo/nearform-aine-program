@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { onlineManager } from "@tanstack/react-query";
 
 interface ConnectivityStatus {
@@ -9,10 +9,17 @@ interface ConnectivityStatus {
 }
 
 export const useConnectivity = (): ConnectivityStatus => {
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHydrated(true);
+  }, []);
+
   const isOnline = useSyncExternalStore(
     (onStoreChange) => onlineManager.subscribe(onStoreChange),
-    () => onlineManager.isOnline(),
-    () => true // Hydration fallback: assume online on server
+    () => (hydrated ? onlineManager.isOnline() : true),
+    () => true
   );
 
   // In a real app, this might also listen to a global "maintenance" state or 503 responses
