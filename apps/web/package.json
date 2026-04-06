@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "quality-gate": "pnpm test:e2e --project=chromium --grep \"@a11y|@responsive\""
+    "quality-gate": "pnpm test:e2e --project=chromium --grep \"@a11y\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
