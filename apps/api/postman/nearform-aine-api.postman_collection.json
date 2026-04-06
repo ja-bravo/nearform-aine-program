@@ -1,0 +1,124 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "nearform-aine API",
+    "description": "Fastify REST API: health checks and todos (Zod-validated JSON, camelCase). Errors: `{ \"error\": { \"code\", \"message\", \"requestId\", \"details?\" } }`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001"
+    },
+    {
+      "key": "todoId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET Live",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/healthz/live",
+            "description": "Liveness probe; does not check the database."
+          },
+          "response": []
+        },
+        {
+          "name": "GET Ready",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/healthz/ready",
+            "description": "Readiness probe; returns 503 if DATABASE_URL is missing or PostgreSQL is unreachable."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Todos",
+      "item": [
+        {
+          "name": "POST Create todo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.data && json.data.id) {",
+                  "    pm.collectionVariables.set('todoId', json.data.id);",
+                  "  }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Example todo from Postman\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/todos",
+            "description": "201: `{ data: TodoDto, meta: { requestId } }`. Body: `description` string, trimmed, 1–10000 chars."
+          },
+          "response": []
+        },
+        {
+          "name": "GET List todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/todos",
+            "description": "200: `{ data: { todos: TodoDto[] }, meta: { requestId } }`. Ordered by `createdAt` descending."
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Update todo completion",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isCompleted\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/todos/{{todoId}}",
+            "description": "Path `id` must be a UUID. 200 on success; 400 validation; 404 if not found. Set `todoId` collection variable or run Create first."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Todo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/todos/{{todoId}}",
+            "description": "204 empty body on success; 400 invalid UUID; 404 not found."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
