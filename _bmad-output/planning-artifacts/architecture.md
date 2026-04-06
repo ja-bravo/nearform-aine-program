@@ -369,7 +369,6 @@ nearform-aine-bmad/
 ├── .env.example
 ├── docker-compose.yml
 ├── docker-compose.override.yml
-├── docker-compose.test.yml
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml

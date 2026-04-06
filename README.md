@@ -19,8 +19,20 @@ Edit `.env` if you change ports or database credentials. Defaults match `docker-
 
 ## Run the full stack (Compose)
 
+**`docker compose up`** starts **`postgres`**, **`api`**, and **`web`** by default (no profile required).
+
 ```bash
 docker compose up --build
+pnpm compose:dev
+```
+
+### Optional `test` profile
+
+**`postgres_test`** is isolated behind **`--profile test`** so it does not run unless you ask for it (default host port **5433**, DB **`todo_test`**, separate volume). Use it for opt-in API integration tests without colliding with dev Postgres on **5432**.
+
+```bash
+docker compose --profile test up -d postgres_test
+pnpm test:db:up
 ```
 
 If **port 5432 is already taken** on your machine (another Postgres instance), map the host side to a free port before starting:
@@ -147,7 +159,14 @@ Uses `tsx` against `apps/api/src/migrate.ts`. After `pnpm --filter api build`, t
 
 ### DB-backed tests
 
-Integration tests that run migrations against a real Postgres are **opt-in**:
+Integration tests that run migrations against a real Postgres are **opt-in**. Use the **`test`** profile so the DB does not collide with dev Postgres on **5432**:
+
+```bash
+pnpm test:db:up
+RUN_DB_TESTS=1 DATABASE_URL=postgresql://todo:todo@127.0.0.1:5433/todo_test pnpm --filter api test
+```
+
+To run against the **default dev** database instead (same credentials as `.env`, default port **5432**):
 
 ```bash
 docker compose up postgres -d
@@ -175,12 +194,6 @@ pnpm turbo run dev
 ```
 
 - Web: [http://localhost:3000](http://localhost:3000)
-- API: [http://localhost:3001](http://localhost:3001) — set `API_PORT` / `DATABASE_URL` in `.env` as needed.
-
-
-
-
-
 - API: [http://localhost:3001](http://localhost:3001) — set `API_PORT` / `DATABASE_URL` in `.env` as needed.
 
 The home page **server-renders** the initial todo list: the Next.js server calls the API using **`API_BASE_URL`** when set, otherwise **`NEXT_PUBLIC_API_BASE_URL`**. In Docker Compose, **`web`** sets **`API_BASE_URL=http://api:<port>`** so SSR can reach the API on the internal network while the browser still uses **`NEXT_PUBLIC_API_BASE_URL`** (e.g. `http://localhost:3001`). The API enables **CORS** for browser calls: set **`CORS_ORIGIN`** to a comma-separated list of allowed web origins (default **`http://localhost:3000`**, aligned with **`WEB_PORT`**). Docker Compose passes **`CORS_ORIGIN`** into the **`api`** service so the UI at **`http://localhost:3000`** can call **`http://localhost:3001`**.
@@ -214,5 +227,5 @@ Then **packages/** and root **Turbo/pnpm** files were merged here. **`apps/web`*
 ## Idempotency
 
 - Running **`pnpm install`** again is safe.
-- Running **`docker compose up`** again is incremental; use **`docker compose down -v`** only when you need a clean database volume.
+- Running **`docker compose up`** again is incremental; use **`docker compose down -v`** when you need a clean **dev** database volume. For a clean **test** DB volume, stop the test service then remove the **`postgres_test_data`** volume if you need a full reset.
 - Database **migrations** run automatically when the API starts; see **Database migrations (Postgrator)** above.

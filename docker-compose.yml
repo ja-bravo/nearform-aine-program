@@ -21,6 +21,28 @@ services:
     networks:
       - app
 
+  postgres_test:
+    profiles:
+      - test
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_TEST_USER:-todo}
+      POSTGRES_PASSWORD: ${POSTGRES_TEST_PASSWORD:-todo}
+      POSTGRES_DB: ${POSTGRES_TEST_DB:-todo_test}
+    ports:
+      - "${POSTGRES_TEST_PORT:-5433}:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_TEST_USER:-todo} -d ${POSTGRES_TEST_DB:-todo_test}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   api:
     build:
       context: .
@@ -81,6 +103,7 @@ services:
 
 volumes:
   postgres_data:
+  postgres_test_data:
 
 networks:
   app:

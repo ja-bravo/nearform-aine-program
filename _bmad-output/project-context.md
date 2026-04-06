@@ -59,7 +59,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 
 - **Conventional Commits:** Use feature-based branches and the Conventional Commits specification.
 - **PR Standards:** PRs require a descriptive body ("why" and "what") and a checklist verifying tests, a11y, and performance.
-- **Docker-First:** All apps must be containerized; use Docker Compose for local development and testing.
+- **Docker-First:** All apps must be containerized; use **`docker compose up`** for the default dev stack and **`--profile test`** when you need the isolated test Postgres service.
 
 ### Critical Don't-Miss Rules
 

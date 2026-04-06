@@ -109,7 +109,7 @@ So that data **survives API restarts** (FR11–FR13) and **acknowledged writes a
 ### Testing requirements
 
 - **Unit:** migration file presence, Postgrator config (mock `pg`).  
-- **Integration (recommended):** with `docker compose up postgres` and `DATABASE_URL`, run migrations then assert table + index exist (`information_schema` / `pg_indexes`).  
+- **Integration (recommended):** with `docker compose up postgres -d` and `DATABASE_URL`, run migrations then assert table + index exist (`information_schema` / `pg_indexes`).  
 - **CI:** document if DB tests are optional until CI service container exists.
 
 ## References

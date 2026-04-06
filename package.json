@@ -11,6 +11,11 @@
     "test": "turbo run test",
     "test:coverage": "turbo run test -- --coverage",
     "test:e2e": "turbo run test:e2e",
+    "compose:dev": "docker compose up --build",
+    "compose:dev:down": "docker compose down",
+    "test:db:up": "docker compose --profile test up -d postgres_test",
+    "test:db:down": "docker compose --profile test down postgres_test",
+    "test:db:logs": "docker compose logs -f postgres_test",
     "test:perf": "mkdir -p _bmad-output/perf-reports && export EXIT_CODE=0; k6 run --summary-export=_bmad-output/perf-reports/read-summary.json perf/k6/api-read-scenarios.js || EXIT_CODE=$?; k6 run --summary-export=_bmad-output/perf-reports/write-summary.json perf/k6/api-write-scenarios.js || EXIT_CODE=$?; k6 run --summary-export=_bmad-output/perf-reports/bulk-load-summary.json perf/k6/bulk-load-scenario.js || EXIT_CODE=$?; exit $EXIT_CODE"
   },
   "devDependencies": {
