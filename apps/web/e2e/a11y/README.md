@@ -6,6 +6,8 @@ This directory contains automated accessibility scans using `@axe-core/playwrigh
 
 Accessibility scans are part of the `quality-gate` script. They target WCAG 2.2 Level AA compliance.
 
+Lighthouse CI budgets, how to run `autorun` against production servers, and the latest recorded scores live in the repo doc [`docs/a11y-lighthouse-review.md`](../../../../docs/a11y-lighthouse-review.md).
+
 ## Known Gaps / Exceptions
 
 *   None. All identified a11y issues must be fixed before release.
