@@ -32,6 +32,7 @@
 - [Data Models - API Service](./data-models-api.md)
 - [Development Guide](./development-guide.md)
 - [Deployment Guide](./deployment-guide.md)
+- [Security review](./security-review.md)
 
 ## Existing Documentation
 - [Root README](../README.md)
