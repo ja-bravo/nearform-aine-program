@@ -89,47 +89,47 @@ export function QuickCaptureBar() {
     <form
       onSubmit={onSubmit}
       data-testid="quick-capture-bar"
-      className="flex flex-col gap-2 p-2 sm:flex-row sm:items-end"
+      className="grid grid-cols-1 gap-2 p-2 sm:grid-cols-[minmax(0,1fr)_auto]"
     >
-      <div className="min-w-0 flex-1">
-        <label
-          htmlFor="quick-capture-description"
-          className="mb-1 block text-sm font-medium text-zinc-800 dark:text-zinc-200"
-        >
-          New task
-        </label>
-        <input
-          id="quick-capture-description"
-          type="text"
-          autoComplete="off"
-          data-testid="quick-capture-input"
-          placeholder="What needs doing?"
-          className="h-12 w-full rounded-lg border border-zinc-300 bg-white px-4 text-sm text-zinc-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50 dark:focus-visible:ring-zinc-400"
-          aria-invalid={errors.description || !!lastError ? "true" : "false"}
-          aria-describedby={
-            [
-              errors.description ? "quick-capture-description-error" : null,
-              lastError ? errorId : null,
-            ]
-              .filter(Boolean)
-              .join(" ") || undefined
-          }
-          {...register("description", {
-            onChange: () => {
-              if (lastError) setLastError(null);
-            },
-          })}
-        />
+      <label
+        htmlFor="quick-capture-description"
+        className="mb-1 block text-sm font-medium text-zinc-800 sm:col-span-2 dark:text-zinc-200"
+      >
+        New task
+      </label>
+      <input
+        id="quick-capture-description"
+        type="text"
+        autoComplete="off"
+        data-testid="quick-capture-input"
+        placeholder="What needs doing?"
+        className="h-12 min-w-0 w-full rounded-lg border border-zinc-300 bg-white px-4 text-sm text-zinc-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2 sm:col-start-1 sm:row-start-2 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50 dark:focus-visible:ring-zinc-400"
+        aria-invalid={errors.description || !!lastError ? "true" : "false"}
+        aria-describedby={
+          [
+            errors.description ? "quick-capture-description-error" : null,
+            lastError ? errorId : null,
+          ]
+            .filter(Boolean)
+            .join(" ") || undefined
+        }
+        {...register("description", {
+          onChange: () => {
+            if (lastError) setLastError(null);
+          },
+        })}
+      />
+      <div className="mt-1 space-y-1 sm:col-start-1 sm:row-start-3">
         {errors.description && (
           <p
             id="quick-capture-description-error"
-            className="mt-1 text-sm text-red-600 dark:text-red-400"
+            className="text-sm text-red-600 dark:text-red-400"
             role="alert"
           >
             {errors.description.message}
           </p>
         )}
-        <div className="mt-1 flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <PersistenceStatusBadge
             status={persistenceStatus}
             data-testid="persistence-status-badge"
@@ -154,7 +154,7 @@ export function QuickCaptureBar() {
           )}
         </div>
       </div>
-      <div className="flex shrink-0">
+      <div className="flex shrink-0 sm:col-start-2 sm:row-start-2 sm:self-center">
         <button
           type="submit"
           data-testid="quick-capture-submit"
