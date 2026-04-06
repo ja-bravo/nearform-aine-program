@@ -10,7 +10,7 @@ describe("LoadingState", () => {
   it("renders with default message", () => {
     render(<LoadingState />);
     expect(screen.getByRole("status")).toBeInTheDocument();
-    expect(screen.getByText("Loading...")).toBeInTheDocument();
+    expect(screen.getByText("Loading tasks")).toBeInTheDocument();
   });
 
   it("renders with custom message", () => {
