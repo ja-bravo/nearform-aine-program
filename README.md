@@ -1,231 +1,152 @@
 # nearform-aine-bmad
 
-Turborepo monorepo: **Next.js** (`apps/web`), **Fastify** (`apps/api`), **PostgreSQL** via **Docker Compose**. Package manager: **pnpm**.
+A full-stack **Todo** application built as a monorepo with [Turborepo](https://turbo.build/repo), [pnpm](https://pnpm.io), and [Docker Compose](https://docs.docker.com/compose/).
+
+| App / Package | Stack | Path |
+|---------------|-------|------|
+| **Web** | Next.js 16 (App Router), React 19, TanStack Query, Tailwind CSS 4 | `apps/web` |
+| **API** | Fastify 5, PostgreSQL 16, `@nearform/sql`, Zod 4 | `apps/api` |
+| **UI** | Shared React component library | `packages/ui` |
+
+```mermaid
+flowchart LR
+    Browser -->|REST / JSON| Web["apps/web<br/>Next.js"]
+    Web -->|SSR & client| API["apps/api<br/>Fastify"]
+    API --> PG[(PostgreSQL 16)]
+```
 
 ## Prerequisites
 
-- **Node.js** 22 LTS (or 20+; see root `engines`)
-- **pnpm** 9+ (`corepack enable && corepack prepare pnpm@latest --activate`)
-- **Docker** + Docker Compose v2 (for the full stack)
+- **Node.js** ≥ 18 (22 LTS recommended)
+- **pnpm** 9+ — `corepack enable && corepack prepare pnpm@latest --activate`
+- **Docker** + Docker Compose v2
 
-## First-time setup
+## Quickstart
 
 ```bash
 pnpm install
-cp .env.example .env
+cp .env.example .env          # defaults match docker-compose.yml
+docker compose up --build      # starts postgres → api → web
 ```
 
-Edit `.env` if you change ports or database credentials. Defaults match `docker-compose.yml`.
+| Service | URL | Health check |
+|---------|-----|--------------|
+| Web | http://localhost:3000 | `/healthz` |
+| API | http://localhost:3001 | `/healthz/live`, `/healthz/ready` |
 
-## Run the full stack (Compose)
+Ports are configurable via `WEB_PORT` and `API_PORT` in `.env`.
 
-**`docker compose up`** starts **`postgres`**, **`api`**, and **`web`** by default (no profile required).
+## Local Development (without Docker for Node)
 
-```bash
-docker compose up --build
-pnpm compose:dev
-```
-
-### Optional `test` profile
-
-**`postgres_test`** is isolated behind **`--profile test`** so it does not run unless you ask for it (default host port **5433**, DB **`todo_test`**, separate volume). Use it for opt-in API integration tests without colliding with dev Postgres on **5432**.
-
-```bash
-docker compose --profile test up -d postgres_test
-pnpm test:db:up
-```
-
-If **port 5432 is already taken** on your machine (another Postgres instance), map the host side to a free port before starting:
-
-```bash
-POSTGRES_PORT=5433 docker compose up --build
-```
-
-The API container still connects to Postgres on the internal `postgres:5432` service; only the **host** mapping changes.
-
-Wait until health checks pass, then verify:
-
-| Service   | Check |
-|-----------|--------|
-| Web       | [http://localhost:3000/healthz](http://localhost:3000/healthz) → JSON `{ "status": "ok" }` |
-| API live  | [http://localhost:3001/healthz/live](http://localhost:3001/healthz/live) |
-| API ready | [http://localhost:3001/healthz/ready](http://localhost:3001/healthz/ready) → 200 when Postgres is reachable |
-
-Ports come from `.env` (`WEB_PORT`, `API_PORT`).
-
-## Todos API (`/api/v1/todos`)
-
-JSON only. List responses use **`{ "data": { "todos": [ ... ] }, "meta": { "requestId": "..." } }`**. Create responses use **`{ "data": { ...todo }, "meta": { "requestId": "..." } }`**. Todos in **`GET /api/v1/todos`** are ordered by **`createdAt` descending** (newest first). Errors use **`{ "error": { "code", "message", "details?", "requestId" } }`** (no stack traces in the body).
-
-Create a todo:
-
-```bash
-curl -sS -X POST "http://localhost:3001/api/v1/todos" \
-  -H "Content-Type: application/json" \
-  -d '{"description":"Buy milk"}'
-```
-
-List todos:
-
-```bash
-curl -sS "http://localhost:3001/api/v1/todos"
-```
-
-Toggle todo completion:
-
-```bash
-curl -sS -X PATCH "http://localhost:3001/api/v1/todos/{id}" \
-  -H "Content-Type: application/json" \
-  -d '{"isCompleted": true}'
-```
-
-Success response (200):
-
-```json
-{
-  "data": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "description": "Buy milk",
-    "isCompleted": true,
-    "createdAt": "2026-03-31T10:30:00.000Z"
-  },
-  "meta": {
-    "requestId": "req-12345abcde"
-  }
-}
-```
-
-Error responses:
-
-- **404 NOT_FOUND** — Todo id does not exist
-- **400 VALIDATION_ERROR** — Invalid request body (e.g., `isCompleted` is not a boolean or is missing)
-
-Delete a todo:
-
-```bash
-curl -sS -X DELETE "http://localhost:3001/api/v1/todos/{id}"
-```
-
-Success response (204 — no body):
-
-```
-HTTP/1.1 204 No Content
-```
-
-Error responses:
-
-- **404 NOT_FOUND** — Todo id does not exist
-
-```json
-{
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Todo not found",
-    "requestId": "req-12345abcde"
-  }
-}
-```
-
-- **400 VALIDATION_ERROR** — `id` is not a valid UUID (e.g., `"abc"`, `"123"`)
-
-```json
-{
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Invalid todo ID format",
-    "details": { "id": "Must be a valid UUID" },
-    "requestId": "req-12345abcde"
-  }
-}
-```
-
-**Compose startup order:** `postgres` exposes a healthcheck (`pg_isready`). The **api** service uses `depends_on: postgres: condition: service_healthy`, so Postgres accepts connections before the API image builds and starts. **web** waits on **api** health (`/healthz/live`), so the database and migrations complete before the UI container is considered up.
-
-## Database migrations (Postgrator)
-
-SQL migrations live in **`apps/api/migrations/`** and are applied with **[Postgrator 8.0.0](https://www.npmjs.com/package/postgrator)**. Files use Postgrator’s naming: **`NNN.do.<description>.sql`** (apply) and **`NNN.undo.<description>.sql`** (revert). Version history is stored in the PostgreSQL table **`schemaversion`** (default Postgrator table).
-
-**Primary path:** on each API boot, **`runMigrations()`** runs before `listen`, so pending migrations apply exactly once before traffic is served. If a migration fails (bad SQL, DB down, permissions), the process **exits** after logging a structured error (no stack traces on HTTP responses—the server never listens).
-
-**Manual / CI (optional):** from the repo root, after `DATABASE_URL` is set:
-
-```bash
-pnpm --filter api migrate
-```
-
-Uses `tsx` against `apps/api/src/migrate.ts`. After `pnpm --filter api build`, the same entry exists as **`node apps/api/dist/migrate.js`**.
-
-**Local requirements:** the API now expects **`DATABASE_URL`** at startup so migrations can run. For UI-only work without Postgres, start **postgres** or point `DATABASE_URL` at a reachable instance.
-
-### DB-backed tests
-
-Integration tests that run migrations against a real Postgres are **opt-in**. Use the **`test`** profile so the DB does not collide with dev Postgres on **5432**:
-
-```bash
-pnpm test:db:up
-RUN_DB_TESTS=1 DATABASE_URL=postgresql://todo:todo@127.0.0.1:5433/todo_test pnpm --filter api test
-```
-
-To run against the **default dev** database instead (same credentials as `.env`, default port **5432**):
-
-```bash
-docker compose up postgres -d
-RUN_DB_TESTS=1 DATABASE_URL=postgresql://todo:todo@127.0.0.1:5432/todo pnpm --filter api test
-```
-
-## Backup and recovery (MVP)
-
-For MVP and single-node deploys, treat the Postgres **volume** as the source of truth: snapshot the data directory or run **`pg_dump`** on a schedule you can actually restore from. There is no automated multi-AZ failover in this baseline—document who runs backups, how often, and where dumps live so an acknowledged write can be recovered after operator error or host loss.
-
-### Clean restart (data wipe)
-
-```bash
-docker compose down -v
-docker compose up --build
-```
-
-## Local development (without Docker for Node apps)
-
-Start Postgres only (or use a local instance and set `DATABASE_URL`):
+Run Postgres in Docker, everything else natively with hot-reload:
 
 ```bash
 docker compose up postgres -d
 pnpm turbo run dev
 ```
 
-- Web: [http://localhost:3000](http://localhost:3000)
-- API: [http://localhost:3001](http://localhost:3001) — set `API_PORT` / `DATABASE_URL` in `.env` as needed.
+- Web: http://localhost:3000
+- API: http://localhost:3001
 
-The home page **server-renders** the initial todo list: the Next.js server calls the API using **`API_BASE_URL`** when set, otherwise **`NEXT_PUBLIC_API_BASE_URL`**. In Docker Compose, **`web`** sets **`API_BASE_URL=http://api:<port>`** so SSR can reach the API on the internal network while the browser still uses **`NEXT_PUBLIC_API_BASE_URL`** (e.g. `http://localhost:3001`). The API enables **CORS** for browser calls: set **`CORS_ORIGIN`** to a comma-separated list of allowed web origins (default **`http://localhost:3000`**, aligned with **`WEB_PORT`**). Docker Compose passes **`CORS_ORIGIN`** into the **`api`** service so the UI at **`http://localhost:3000`** can call **`http://localhost:3001`**.
+The Next.js server calls the API using `API_BASE_URL` (SSR, internal network in Compose) or `NEXT_PUBLIC_API_BASE_URL` (browser). CORS is controlled by `CORS_ORIGIN` in `.env`.
 
-## Monorepo tasks
+## Project Structure
 
-```bash
-pnpm turbo run build      # production build (web + api)
-pnpm turbo run lint
-pnpm turbo run typecheck
-pnpm turbo run test
-pnpm --filter web test    # web unit/component tests (Vitest)
+```
+├── apps/
+│   ├── api/                  # Fastify REST API
+│   │   ├── migrations/       # Postgrator SQL migrations (run on boot)
+│   │   └── src/
+│   │       ├── features/todos/
+│   │       └── shared/       # db, http plugins
+│   └── web/                  # Next.js frontend
+│       └── src/
+│           ├── app/          # App Router pages
+│           ├── features/todos/
+│           └── shared/       # hooks, api client, ui
+├── packages/
+│   ├── ui/                   # Shared React components
+│   ├── eslint-config/
+│   └── typescript-config/
+├── perf/                     # k6 load-test scripts + budgets
+├── docs/                     # Generated & authored project docs
+└── docker-compose.yml
 ```
 
-## Turborepo bootstrap note
+Both apps follow a **feature-first** layout: domain logic lives under `features/<name>/` with co-located tests.
 
-The repo root already contained `_bmad-output/` and `.cursor/`, so `create-turbo` could not target `.` directly. The baseline was generated with:
+## Common Commands
 
 ```bash
-CI=1 pnpm dlx create-turbo@latest <empty-temp-dir> -m pnpm --no-git
+pnpm turbo run build          # production build (all apps)
+pnpm turbo run lint            # ESLint
+pnpm turbo run typecheck       # TypeScript --noEmit
+pnpm turbo run test            # unit + component tests (Vitest)
+pnpm --filter web test:e2e     # Playwright E2E
+pnpm --filter web quality-gate # axe-core accessibility gate
+pnpm test:perf                 # k6 performance tests
 ```
 
-Then **packages/** and root **Turbo/pnpm** files were merged here. **`apps/web`** was added with `pnpm create next-app` (TypeScript, App Router, `src/`, ESLint, Tailwind, pnpm). **`apps/api`** is a Fastify TypeScript app.
+## Database
 
-## Security / production (baseline)
+Migrations are managed by [Postgrator](https://www.npmjs.com/package/postgrator) and live in `apps/api/migrations/`. They run automatically when the API boots — no manual step required for development.
 
-- **HTTPS:** In production, terminate TLS at the edge and expose the API to browsers **only** over HTTPS (`NEXT_PUBLIC_API_BASE_URL` must be an `https://` origin).
-- **Errors:** The API returns a consistent JSON error shape and does not send stack traces to clients.
-- **Exposure:** Default compose defines **no** admin or bulk-export routes.
+To run migrations manually:
 
-## Idempotency
+```bash
+pnpm --filter api migrate
+```
 
-- Running **`pnpm install`** again is safe.
-- Running **`docker compose up`** again is incremental; use **`docker compose down -v`** when you need a clean **dev** database volume. For a clean **test** DB volume, stop the test service then remove the **`postgres_test_data`** volume if you need a full reset.
-- Database **migrations** run automatically when the API starts; see **Database migrations (Postgrator)** above.
+### Test Database
+
+An isolated Postgres instance is available behind the `test` profile (port **5433**, database `todo_test`) so integration tests never collide with dev data:
+
+```bash
+pnpm test:db:up               # starts postgres_test container
+RUN_DB_TESTS=1 DATABASE_URL=postgresql://todo:todo@127.0.0.1:5433/todo_test \
+  pnpm --filter api test
+```
+
+### Clean Restart (wipe data)
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+## API Overview
+
+The API exposes a single resource at `/api/v1/todos` (CRUD). All responses follow a consistent envelope:
+
+- **Success:** `{ "data": { ... }, "meta": { "requestId": "..." } }`
+- **Error:** `{ "error": { "code": "...", "message": "...", "requestId": "..." } }`
+
+No stack traces are ever returned to clients. See the [API contracts documentation](./docs/api-contracts-api.md) for the full schema, request/response examples, and error codes.
+
+## Testing
+
+| Layer | Tool | Command |
+|-------|------|---------|
+| Unit / Component | Vitest + Testing Library | `pnpm turbo run test` |
+| E2E | Playwright | `pnpm --filter web test:e2e` |
+| Accessibility | axe-core via Playwright | `pnpm --filter web quality-gate` |
+| Performance | k6 | `pnpm test:perf` |
+| DB Integration | Vitest + real Postgres | See [Test Database](#test-database) above |
+
+Minimum coverage target: **70%** for core feature logic.
+
+## CI
+
+GitHub Actions runs lint, typecheck, unit tests, E2E, and the accessibility quality gate on every push. See [`.github/workflows/test.yml`](.github/workflows/test.yml) and the [CI documentation](./docs/ci.md) for details.
+
+## Documentation
+
+The `docs/` folder contains generated and authored documentation covering architecture, API contracts, data models, deployment, security, accessibility, and the AI integration story behind this project.
+
+Start with the [documentation index](./docs/index.md).
+
+## Security Notes
+
+- Terminate TLS at the edge in production — `NEXT_PUBLIC_API_BASE_URL` must be `https://`.
+- The API returns a consistent error envelope; no internal stack traces leak to clients.
+- No ORM — all queries use `@nearform/sql` with parameterized SQL.

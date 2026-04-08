@@ -1,44 +1,60 @@
 # Project Documentation Index
 
 ## Project Overview
-- **Type:** monorepo with 3 parts
+- **Type:** Monorepo with 3 parts
 - **Primary Language:** TypeScript
-- **Architecture:** Monorepo (Turbo, pnpm)
+- **Architecture:** Turborepo + pnpm workspaces
 
 ## Quick Reference
 
 #### API Service (api)
-- **Type:** backend
-- **Tech Stack:** Fastify, PostgreSQL, Zod, Vitest
+- **Type:** Backend
+- **Tech Stack:** Fastify 5, PostgreSQL 16, @nearform/sql, Zod 4, Vitest
 - **Root:** `apps/api`
 
 #### Web Frontend (web)
-- **Type:** web
-- **Tech Stack:** Next.js (App Router), React, Tailwind CSS, TanStack Query, Vitest, Playwright
+- **Type:** Web
+- **Tech Stack:** Next.js 16 (App Router), React 19, TanStack Query 5, Tailwind CSS 4, Playwright
 - **Root:** `apps/web`
 
 #### UI Components (ui)
-- **Type:** library
-- **Tech Stack:** React, TypeScript
+- **Type:** Library
+- **Tech Stack:** React 19, TypeScript 5.9
 - **Root:** `packages/ui`
 
 ## Generated Documentation
+
+### Core
 - [Project Overview](./project-overview.md)
-- [Architecture - API Service](./architecture-api.md)
-- [Architecture - Web Frontend](./architecture-web.md)
-- [Architecture - UI Components](./architecture-ui.md)
 - [Source Tree Analysis](./source-tree-analysis.md)
-- [API Contracts - API Service](./api-contracts-api.md)
-- [Data Models - API Service](./data-models-api.md)
+- [Integration Architecture](./integration-architecture.md)
+
+### Architecture (per part)
+- [Architecture — API Service](./architecture-api.md)
+- [Architecture — Web Frontend](./architecture-web.md)
+- [Architecture — UI Components](./architecture-ui.md)
+
+### API & Data
+- [API Contracts — API Service](./api-contracts-api.md)
+- [Data Models — API Service](./data-models-api.md)
+
+### Operations
 - [Development Guide](./development-guide.md)
 - [Deployment Guide](./deployment-guide.md)
-- [Security review](./security-review.md)
+- [CI Pipeline](./ci.md)
+- [CI Secrets Checklist](./ci-secrets-checklist.md)
+
+### Quality & Security
+- [Security Review](./security-review.md)
+- [Accessibility & Lighthouse Review](./a11y-lighthouse-review.md)
+
+## Process Documentation
+- [AI Integration Log](./ai-integration.md)
 
 ## Existing Documentation
 - [Root README](../README.md)
 - [Web README](../apps/web/README.md)
-- [CI Documentation](./ci.md)
-- [CI Secrets Checklist](./ci-secrets-checklist.md)
 
 ## Getting Started
-To get started with development, please refer to the [Development Guide](./development-guide.md).
+To get started with development, see the [Development Guide](./development-guide.md).
+For deployment and CI, see the [Deployment Guide](./deployment-guide.md).

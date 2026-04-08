@@ -1,82 +1,76 @@
 {
   "workflow_version": "1.2.0",
   "timestamps": {
-    "started": "2026-04-05T10:00:00Z",
-    "last_updated": "2026-04-05T10:00:00Z"
+    "started": "2026-04-08T16:30:00Z",
+    "last_updated": "2026-04-08T16:55:00Z"
   },
-  "mode": "initial_scan",
-  "scan_level": "quick",
+  "mode": "full_rescan",
+  "scan_level": "deep",
   "project_root": "/Users/joseantoniobravoisidro/Desktop/dev/personal/nearform-aine-bmad",
   "project_knowledge": "/Users/joseantoniobravoisidro/Desktop/dev/personal/nearform-aine-bmad/docs",
   "completed_steps": [
     {
       "step": "step_1",
       "status": "completed",
-      "timestamp": "2026-04-05T10:00:00Z",
-      "summary": "Classified as monorepo with 3 parts: api, web, ui"
+      "timestamp": "2026-04-08T16:30:00Z",
+      "summary": "Classified as monorepo with 3 parts: api (backend), web (web), ui (library)"
     },
     {
       "step": "step_2",
       "status": "completed",
-      "timestamp": "2026-04-05T10:05:00Z",
-      "summary": "Found 4 existing docs: root README, web README, and CI docs in /docs"
+      "timestamp": "2026-04-08T16:31:00Z",
+      "summary": "Found 16 existing docs across root, docs/, and app-level READMEs"
     },
     {
       "step": "step_3",
       "status": "completed",
-      "timestamp": "2026-04-05T10:10:00Z",
-      "summary": "Analyzed tech stack: Fastify (API), Next.js (Web), React (UI)"
+      "timestamp": "2026-04-08T16:35:00Z",
+      "summary": "Tech stack analyzed: Fastify 5 (API), Next.js 16 (Web), React 19 (UI). All TypeScript 5.9."
     },
     {
       "step": "step_4",
       "status": "completed",
-      "timestamp": "2026-04-05T10:15:00Z",
-      "summary": "Performed conditional analysis: API routes, data models, components, CI/CD"
+      "timestamp": "2026-04-08T16:40:00Z",
+      "summary": "Deep scan of all source files: 17 API files, 47 Web files, 3 UI files. API routes, schemas, repository, mappers, shared infra, all components, hooks, contexts analyzed."
     },
     {
       "step": "step_5",
       "status": "completed",
-      "timestamp": "2026-04-05T10:20:00Z",
-      "summary": "Source tree documented"
+      "timestamp": "2026-04-08T16:42:00Z",
+      "summary": "Source tree analysis written with annotated directory structure, critical folders, entry points, and integration points"
     },
     {
       "step": "step_6",
       "status": "completed",
-      "timestamp": "2026-04-05T10:25:00Z",
-      "summary": "Dev/deployment guides written"
+      "timestamp": "2026-04-08T16:44:00Z",
+      "summary": "Development guide and deployment guide written covering setup, commands, env vars, Docker, CI pipeline"
     },
     {
       "step": "step_7",
       "status": "completed",
-      "timestamp": "2026-04-05T10:30:00Z",
-      "summary": "Integration architecture documented"
+      "timestamp": "2026-04-08T16:46:00Z",
+      "summary": "Integration architecture documented: Web↔API (SSR+client), API↔PostgreSQL, Web→UI package, CORS, Docker networking"
     },
     {
       "step": "step_8",
       "status": "completed",
-      "timestamp": "2026-04-05T10:35:00Z",
-      "summary": "Architecture docs written for 3 parts"
+      "timestamp": "2026-04-08T16:48:00Z",
+      "summary": "Architecture docs written for all 3 parts with diagrams, design decisions, and source structure"
     },
     {
       "step": "step_9",
       "status": "completed",
-      "timestamp": "2026-04-05T10:40:00Z",
-      "summary": "All supporting docs written"
+      "timestamp": "2026-04-08T16:50:00Z",
+      "summary": "Project overview, API contracts, data models, integration architecture written"
     },
     {
       "step": "step_10",
       "status": "completed",
-      "timestamp": "2026-04-05T10:45:00Z",
-      "summary": "Master index generated"
-    },
-    {
-      "step": "step_12",
-      "status": "completed",
-      "timestamp": "2026-04-05T10:50:00Z",
-      "summary": "Workflow complete"
+      "timestamp": "2026-04-08T16:52:00Z",
+      "summary": "Master index generated with links to all 16 docs organized by category"
     }
   ],
-  "current_step": "completed",
+  "current_step": "step_11",
   "findings": {
     "project_classification": {
       "repository_type": "monorepo",
@@ -103,29 +97,42 @@
         }
       ]
     },
-    "existing_docs": [
-      "./README.md",
-      "apps/web/README.md",
-      "docs/ci-secrets-checklist.md",
-      "docs/ci.md"
-    ]
+    "project_types": [
+      {
+        "part_id": "api",
+        "project_type_id": "backend",
+        "display_name": "API Service"
+      },
+      {
+        "part_id": "web",
+        "project_type_id": "web",
+        "display_name": "Web Frontend"
+      },
+      {
+        "part_id": "ui",
+        "project_type_id": "library",
+        "display_name": "UI Components"
+      }
+    ],
+    "technology_stack": {
+      "api": "Fastify 5.2.1, pg 8.14.1, @nearform/sql 1.10.7, Zod 4, Postgrator 8.0.0",
+      "web": "Next.js 16.2.2, React 19.2.4, TanStack Query 5.95.2, Tailwind CSS 4, RHF 7.72.0",
+      "ui": "React 19.2.0, TypeScript 5.9.2"
+    }
   },
   "outputs_generated": [
     "project-scan-report.json",
-    "project-overview.md",
     "source-tree-analysis.md",
-    "architecture-api.md",
-    "architecture-web.md",
-    "architecture-ui.md",
     "api-contracts-api.md",
     "data-models-api.md",
     "development-guide.md",
     "deployment-guide.md",
+    "architecture-api.md",
+    "architecture-web.md",
+    "architecture-ui.md",
+    "project-overview.md",
+    "integration-architecture.md",
     "index.md"
   ],
-  "resume_instructions": "Workflow complete"
-}
-
-  "outputs_generated": ["project-scan-report.json"],
-  "resume_instructions": "Starting from step 2"
+  "resume_instructions": "Validation and review pending at step 11"
 }
